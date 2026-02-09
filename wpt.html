@@ -2,26 +2,54 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Tes WPT | TilikPsikologi</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tes WPT | Tilik Psikologi</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Mencegah seleksi teks agar soal tidak bisa di-copy */
+        body {
+            user-select: none;
+            -webkit-user-select: none;
+        }
+    </style>
 </head>
-<body class="bg-slate-50 p-6">
-    <div class="max-w-2xl mx-auto bg-white p-8 rounded-2xl shadow-lg border">
-        <div class="flex justify-between items-center mb-8 border-b pb-4 text-blue-900">
-            <h1 class="font-bold text-xl">Tes WPT (Kognitif)</h1>
-            <div id="timer" class="text-2xl font-mono text-red-600 font-bold">12:00</div>
-        </div>
+<body class="bg-slate-50 text-slate-900 font-sans">
 
-        <div id="soal-area">
-            <h2 id="teks-soal" class="text-xl font-medium mb-6">Memuat soal...</h2>
-            <div id="pilihan-jawaban" class="space-y-4">
-                </div>
-            
-            <div class="mt-10 pt-6 border-t flex justify-end">
-                <button id="btnNext" onclick="nextQuestion()" class="bg-blue-600 text-white px-10 py-3 rounded-xl font-bold hover:bg-blue-700 transition">
-                    Selanjutnya
-                </button>
+    <div id="start-screen" class="min-h-screen flex items-center justify-center p-6 text-center">
+        <div class="bg-white max-w-md p-8 rounded-3xl shadow-xl border">
+            <h2 class="text-2xl font-bold text-red-600 mb-4">Perhatian Keamanan!</h2>
+            <p class="text-slate-600 mb-6 text-sm">
+                Tes ini akan berjalan dalam mode **Layar Penuh**. Selama tes berlangsung, Anda **DILARANG**:
+            </p>
+            <ul class="text-left text-xs text-slate-500 space-y-2 mb-8 bg-slate-50 p-4 rounded-xl">
+                <li>• Berpindah tab atau membuka aplikasi lain.</li>
+                <li>• Menekan tombol keluar atau minimize.</li>
+                <li>• Mengambil screenshot atau menyalin teks.</li>
+            </ul>
+            <p class="text-xs font-bold text-red-500 mb-6">Jika Anda melanggar lebih dari 2 kali, sistem akan mengirimkan jawaban secara otomatis.</p>
+            <button onclick="mulaiTesWPT()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold hover:bg-blue-700 transition">
+                Saya Mengerti & Mulai
+            </button>
+        </div>
+    </div>
+
+    <div id="test-content" class="hidden min-h-screen p-6">
+        <div class="max-w-2xl mx-auto bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-xl font-bold text-blue-900 uppercase">Tes WPT</h1>
+                <div id="timer" class="text-red-600 font-black text-xl">12:00</div>
             </div>
+            
+            <div id="quiz-container">
+                <p class="mb-6 font-medium">1. Manakah dari kata-kata berikut yang paling tidak menyerupai kata lainnya?</p>
+                <div class="space-y-3">
+                    <label class="block p-4 border rounded-xl hover:bg-slate-50 cursor-pointer"><input type="radio" name="q1" value="0"> Jeruk</label>
+                    <label class="block p-4 border rounded-xl hover:bg-slate-50 cursor-pointer"><input type="radio" name="q1" value="0"> Apel</label>
+                    <label class="block p-4 border rounded-xl hover:bg-slate-50 cursor-pointer"><input type="radio" name="q1" value="1"> Wortel</label>
+                </div>
+            </div>
+
+            <button onclick="kirimHasilWPT()" class="mt-10 w-full bg-blue-900 text-white py-4 rounded-2xl font-bold">Kirim Jawaban</button>
         </div>
     </div>
 
@@ -29,7 +57,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // CONFIG FIREBASE MILIK RAFAEL
         const firebaseConfig = {
             apiKey: "AIzaSyBZsXx_T5-5bKp14BLhuZGNfj4Ils71nVA",
             authDomain: "tilikpsikologi-cbt.firebaseapp.com",
@@ -42,85 +69,50 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // DATA SOAL
-        const daftarSoal = [
-            { q: "Lawan kata dari 'Cepat' adalah?", a: ["Lari", "Lambat", "Gesit", "Tangkas"], c: 1 },
-            { q: "1, 3, 5, 7, ... angka selanjutnya adalah?", a: ["8", "9", "10", "11"], c: 1 },
-            { q: "Bulan ke-10 dalam setahun adalah?", a: ["Agustus", "September", "Oktober", "November"], c: 2 }
-        ];
+        let warningCount = 0;
 
-        let idx = 0; let skor = 0; let timeLeft = 720; let jawabanTerpilih = null;
-
-        // FUNGSI RENDER (Dibuat Global agar bisa diakses HTML)
-        window.tampilkanSoal = () => {
-            const s = daftarSoal[idx];
-            document.getElementById('teks-soal').innerText = `${idx + 1}. ${s.q}`;
-            const containerPilihan = document.getElementById('pilihan-jawaban');
-            containerPilihan.innerHTML = "";
-            
-            s.a.forEach((opt, i) => {
-                const item = document.createElement('div');
-                item.className = "p-4 border-2 rounded-xl cursor-pointer hover:bg-blue-50 transition border-slate-100";
-                item.innerHTML = `<label class="flex items-center gap-3 cursor-pointer w-full">
-                    <input type="radio" name="wpt" value="${i}" class="w-4 h-4"> ${opt}
-                </label>`;
-                item.onclick = () => {
-                    item.querySelector('input').checked = true;
-                    jawabanTerpilih = i;
-                };
-                containerPilihan.appendChild(item);
-            });
-            
-            if(idx === daftarSoal.length - 1) document.getElementById('btnNext').innerText = "Kirim Hasil";
+        // Fungsi Masuk Fullscreen
+        window.mulaiTesWPT = () => {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) { elem.requestFullscreen(); }
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('test-content').classList.remove('hidden');
         };
 
-        // FUNGSI NEXT
-        window.nextQuestion = async () => {
-            if(jawabanTerpilih === null) return alert("Pilih jawaban dulu!");
-            
-            if(jawabanTerpilih === daftarSoal[idx].c) skor++;
-            
-            idx++;
-            jawabanTerpilih = null;
-
-            if(idx < daftarSoal.length) {
-                window.tampilkanSoal();
-            } else {
-                await kirimKeFirebase();
+        // Deteksi Pindah Tab / Minimize
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden) {
+                warningCount++;
+                if (warningCount >= 3) {
+                    alert("Pelanggaran Keamanan: Anda terlalu sering meninggalkan halaman! Jawaban dikirim otomatis.");
+                    kirimHasilWPT("Diskualifikasi (Pindah Tab)");
+                } else {
+                    alert(`Peringatan ${warningCount}: Jangan pindah tab atau membuka aplikasi lain selama tes!`);
+                }
             }
-        };
+        });
 
-        async function kirimKeFirebase() {
-            const user = JSON.parse(localStorage.getItem('pesertaAktif')) || {nama: "Peserta Anonim"};
-            document.getElementById('soal-area').innerHTML = "<p class='text-center py-10'>Mengirim data...</p>";
-            
+        // Deteksi Kehilangan Fokus Window
+        window.addEventListener("blur", () => {
+            console.log("Browser kehilangan fokus");
+        });
+
+        // Fungsi Kirim Hasil
+        window.kirimHasilWPT = async (statusOverride = null) => {
+            const nama = localStorage.getItem("nama_peserta") || "Anonim";
             try {
                 await addDoc(collection(db, "hasil_tes"), {
-                    nama: user.nama,
+                    nama: nama,
                     tes: "WPT",
-                    skor: skor,
-                    waktu: new Date().toLocaleString()
+                    skor: statusOverride ? statusOverride : "50", // Ganti dengan logika skor asli
+                    waktu: new Date().toLocaleString("id-ID")
                 });
-                alert("Tes Selesai! Data Anda sudah masuk di Dashboard Admin.");
-                window.location.href = "pilih-tes.html";
+                if (document.fullscreenElement) { document.exitFullscreen(); }
+                window.location.href = "index.html";
             } catch (e) {
-                alert("Gagal kirim data. Cek koneksi internet.");
+                alert("Koneksi bermasalah.");
             }
-        }
-
-        // TIMER
-        setInterval(() => {
-            if(timeLeft > 0) {
-                timeLeft--;
-                let m = Math.floor(timeLeft / 60); let s = timeLeft % 60;
-                document.getElementById('timer').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
-            } else {
-                kirimKeFirebase();
-            }
-        }, 1000);
-
-        // JALANKAN PERTAMA KALI
-        window.tampilkanSoal();
+        };
     </script>
 </body>
 </html>
