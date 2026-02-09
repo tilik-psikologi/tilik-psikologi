@@ -13,31 +13,14 @@
         .badge-disc { background-color: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
         .badge-wpt { background-color: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
         .badge-kraepelin { background-color: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
-        #login-overlay { background-color: #0f172a; display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .fade-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body class="min-h-screen">
 
-    <!-- Screen Login -->
-    <div id="login-overlay" class="fixed inset-0 p-6">
-        <div class="w-full max-w-md bg-white rounded-[2.5rem] p-10 shadow-2xl text-center">
-            <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-            </div>
-            <h2 class="text-2xl font-black text-slate-900 mb-2">Admin Login</h2>
-            <p class="text-slate-500 text-sm mb-8">Masukkan password untuk melihat hasil data peserta.</p>
-            <input type="password" id="adminPassword" placeholder="Password" 
-                class="w-full px-6 py-4 rounded-2xl border-2 border-slate-100 focus:border-blue-500 outline-none mb-4 text-center font-bold tracking-widest"
-                onkeypress="handleKeyPress(event)">
-            <button onclick="checkAdminPassword()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-blue-700 shadow-xl shadow-blue-200 transition-all">Masuk ke Panel</button>
-            <p id="login-error" class="text-red-500 text-xs mt-4 font-bold hidden">Password salah atau terjadi kendala!</p>
-        </div>
-    </div>
-
-    <!-- Main Content -->
-    <div id="admin-content" class="hidden p-4 md:p-8">
+    <!-- Main Content (Terbuka secara default) -->
+    <div id="admin-content" class="p-4 md:p-8 fade-in">
         <div class="max-w-6xl mx-auto">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                 <div>
@@ -45,9 +28,27 @@
                     <p class="text-slate-500 text-sm">Monitoring hasil asesmen secara real-time.</p>
                 </div>
                 <div class="flex gap-2 w-full md:w-auto">
-                    <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Cari nama..." class="w-full md:w-64 px-4 py-2 rounded-xl border border-slate-300 outline-none text-sm">
-                    <button onclick="exportCSV()" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg hover:bg-blue-700 transition">Export CSV</button>
-                    <button onclick="location.reload()" class="bg-slate-200 text-slate-600 px-4 py-2 rounded-xl text-sm font-bold hover:bg-slate-300 transition">Keluar</button>
+                    <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Cari nama peserta..." class="w-full md:w-64 px-4 py-2 rounded-xl border border-slate-300 outline-none text-sm focus:ring-2 focus:ring-blue-500">
+                    <button onclick="exportCSV()" class="bg-blue-600 text-white px-6 py-2 rounded-xl text-sm font-bold shadow-lg hover:bg-blue-700 transition-all">Export CSV</button>
+                    <button onclick="location.reload()" class="bg-slate-200 text-slate-600 px-4 py-2 rounded-xl text-sm font-bold hover:bg-slate-300 transition-all">Refresh</button>
+                </div>
+            </div>
+
+            <!-- Stats Overview -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div class="admin-card p-6 rounded-3xl shadow-sm">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Data</p>
+                    <h3 id="stat-total" class="text-3xl font-black text-slate-900">0</h3>
+                </div>
+                <div class="admin-card p-6 rounded-3xl shadow-sm border-l-4 border-l-blue-500">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Status Database</p>
+                    <h3 class="text-sm font-bold text-emerald-500 flex items-center gap-2">
+                        <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> Online
+                    </h3>
+                </div>
+                <div class="admin-card p-6 rounded-3xl shadow-sm">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Waktu Update</p>
+                    <h3 id="stat-time" class="text-sm font-bold text-slate-600">-</h3>
                 </div>
             </div>
 
@@ -56,7 +57,7 @@
                     <table class="w-full text-left border-collapse" id="resultsTable">
                         <thead>
                             <tr class="table-header text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                                <th class="px-6 py-5">Waktu</th>
+                                <th class="px-6 py-5">Waktu Selesai</th>
                                 <th class="px-6 py-5">Nama Peserta</th>
                                 <th class="px-6 py-5">Jenis Tes</th>
                                 <th class="px-6 py-5">Hasil / Skor</th>
@@ -64,11 +65,15 @@
                             </tr>
                         </thead>
                         <tbody id="tableBody" class="text-sm font-medium text-slate-700">
-                            <!-- Data dimuat di sini -->
+                            <tr>
+                                <td colspan="5" class="px-6 py-10 text-center text-slate-400 italic">Menghubungkan ke server...</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
+            
+            <p class="text-center mt-8 text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em]">Tilik Psikologi Digital System</p>
         </div>
     </div>
 
@@ -77,8 +82,7 @@
         import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        const SECRET_PASSWORD = "admin123"; 
-
+        // Konfigurasi Firebase
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { 
             apiKey: "AIzaSyBZsXx_T5-5bKp14BLhuZGNfj4Ils71nVA", 
             authDomain: "tilikpsikologi-cbt.firebaseapp.com", 
@@ -93,26 +97,7 @@
         const auth = getAuth(app);
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'tilik-psikologi-prod';
 
-        window.handleKeyPress = (event) => {
-            if (event.key === "Enter") {
-                checkAdminPassword();
-            }
-        };
-
-        window.checkAdminPassword = () => {
-            const inputPass = document.getElementById('adminPassword').value.trim();
-            if (inputPass === SECRET_PASSWORD) {
-                document.getElementById('login-overlay').classList.add('hidden');
-                document.getElementById('admin-content').classList.remove('hidden');
-                initAuth();
-            } else {
-                const errEl = document.getElementById('login-error');
-                errEl.innerText = "Password salah! Silakan coba lagi.";
-                errEl.classList.remove('hidden');
-                setTimeout(() => errEl.classList.add('hidden'), 3000);
-            }
-        };
-
+        // Inisialisasi Autentikasi Langsung
         const initAuth = async () => {
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -126,11 +111,11 @@
                 }
             } catch (err) { 
                 console.error("Auth error:", err); 
-                const errEl = document.getElementById('login-error');
-                errEl.innerText = "Gagal menghubungkan ke server.";
-                errEl.classList.remove('hidden');
             }
         };
+
+        // Mulai autentikasi saat file dimuat
+        initAuth();
 
         onAuthStateChanged(auth, (user) => { 
             if (user) loadData(); 
@@ -145,10 +130,13 @@
                 let dataList = [];
                 snapshot.forEach((doc) => dataList.push(doc.data()));
                 
+                // Urutkan berdasarkan waktu terbaru
                 dataList.sort((a, b) => {
-                    const dateA = new Date(a.waktu.split(', ').reverse().join(' '));
-                    const dateB = new Date(b.waktu.split(', ').reverse().join(' '));
-                    return dateB - dateA;
+                    const parseDate = (str) => {
+                        try { return new Date(str.split(', ').reverse().join(' ')); } 
+                        catch(e) { return new Date(); }
+                    };
+                    return parseDate(b.waktu) - parseDate(a.waktu);
                 });
 
                 if(dataList.length === 0) {
@@ -169,9 +157,12 @@
                     `;
                     tableBody.appendChild(tr);
                 });
+
+                document.getElementById('stat-total').innerText = dataList.length;
+                document.getElementById('stat-time').innerText = new Date().toLocaleTimeString('id-ID');
             }, (err) => {
                 console.error("Firestore error:", err);
-                document.getElementById('tableBody').innerHTML = `<tr><td colspan="5" class="text-center text-red-500 p-10 font-bold">Gagal memuat data. Periksa izin Firestore (Rules).</td></tr>`;
+                document.getElementById('tableBody').innerHTML = `<tr><td colspan="5" class="text-center text-red-500 p-10 font-bold">Izin ditolak. Pastikan Rules Firestore sudah diset ke 'true'.</td></tr>`;
             });
         }
 
