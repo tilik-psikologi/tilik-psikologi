@@ -19,7 +19,7 @@
 </head>
 <body class="min-h-screen">
 
-    <!-- Main Content (Terbuka secara default tanpa login) -->
+    <!-- Main Content -->
     <div id="admin-content" class="p-4 md:p-8 fade-in">
         <div class="max-w-6xl mx-auto">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
@@ -42,8 +42,8 @@
                 </div>
                 <div class="admin-card p-6 rounded-3xl shadow-sm border-l-4 border-l-blue-500">
                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Status Database</p>
-                    <h3 class="text-sm font-bold text-emerald-500 flex items-center gap-2">
-                        <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> Online
+                    <h3 id="db-status" class="text-sm font-bold text-amber-500 flex items-center gap-2">
+                        <span class="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></span> Menghubungkan...
                     </h3>
                 </div>
                 <div class="admin-card p-6 rounded-3xl shadow-sm">
@@ -66,7 +66,7 @@
                         </thead>
                         <tbody id="tableBody" class="text-sm font-medium text-slate-700">
                             <tr>
-                                <td colspan="5" class="px-6 py-10 text-center text-slate-400 italic">Menghubungkan ke server...</td>
+                                <td colspan="5" class="px-6 py-10 text-center text-slate-400 italic">Mencoba terhubung ke Firebase...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -97,7 +97,12 @@
         const auth = getAuth(app);
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'tilik-psikologi-prod';
 
-        // Inisialisasi Autentikasi Langsung tanpa prompt password
+        const setStatus = (text, colorClass) => {
+            const el = document.getElementById('db-status');
+            el.className = `text-sm font-bold ${colorClass} flex items-center gap-2`;
+            el.innerHTML = `<span class="w-2 h-2 ${colorClass.replace('text', 'bg')} rounded-full"></span> ${text}`;
+        };
+
         const initAuth = async () => {
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -110,42 +115,47 @@
                     await signInAnonymously(auth);
                 }
             } catch (err) { 
-                console.error("Auth error:", err); 
+                console.error("Auth error:", err);
+                setStatus("Gagal Autentikasi", "text-red-500");
+                document.getElementById('tableBody').innerHTML = `<tr><td colspan="5" class="px-6 py-10 text-center text-red-500 font-bold">Error: ${err.message}</td></tr>`;
             }
         };
 
         initAuth();
 
         onAuthStateChanged(auth, (user) => { 
-            if (user) loadData(); 
+            if (user) {
+                console.log("User terautentikasi:", user.uid);
+                loadData(); 
+            }
         });
 
         function loadData() {
-            // Path koleksi tetap terjaga sesuai infrastruktur
             const resultsCol = collection(db, 'artifacts', appId, 'public', 'data', 'hasil_tes');
             
+            // Listener onSnapshot dengan error callback
             onSnapshot(resultsCol, (snapshot) => {
+                setStatus("Online", "text-emerald-500");
                 const tableBody = document.getElementById('tableBody');
                 tableBody.innerHTML = "";
                 let dataList = [];
                 snapshot.forEach((doc) => dataList.push(doc.data()));
                 
-                // Urutkan data berdasarkan waktu terbaru
                 dataList.sort((a, b) => {
                     const parseDate = (str) => {
                         try {
-                            // Mengubah format dd/mm/yyyy, hh.mm.ss menjadi format Date yang valid
                             const parts = str.split(', ');
                             const dateParts = parts[0].split('/');
                             const timeParts = parts[1].replace(/\./g, ':');
                             return new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}T${timeParts}`);
-                        } catch(e) { return new Date(); }
+                        } catch(e) { return new Date(0); }
                     };
                     return parseDate(b.waktu) - parseDate(a.waktu);
                 });
 
                 if(dataList.length === 0) {
-                    tableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-10 text-center text-slate-400 italic">Belum ada data masuk.</td></tr>`;
+                    tableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-10 text-center text-slate-400 italic">Database kosong. Belum ada peserta yang menyelesaikan tes.</td></tr>`;
+                    document.getElementById('stat-total').innerText = "0";
                     return;
                 }
 
@@ -167,7 +177,15 @@
                 document.getElementById('stat-time').innerText = new Date().toLocaleTimeString('id-ID');
             }, (err) => {
                 console.error("Firestore error:", err);
-                document.getElementById('tableBody').innerHTML = `<tr><td colspan="5" class="text-center text-red-500 p-10 font-bold">Gagal memuat data. Periksa Rules Firestore.</td></tr>`;
+                setStatus("Izin Ditolak", "text-red-500");
+                document.getElementById('tableBody').innerHTML = `
+                    <tr>
+                        <td colspan="5" class="px-6 py-10 text-center text-red-500">
+                            <p class="font-bold">Gagal memuat data!</p>
+                            <p class="text-xs mt-2">Pastikan Firestore Rules Anda mengizinkan akses 'read'.</p>
+                            <p class="text-[10px] mt-1 font-mono">${err.message}</p>
+                        </td>
+                    </tr>`;
             });
         }
 
