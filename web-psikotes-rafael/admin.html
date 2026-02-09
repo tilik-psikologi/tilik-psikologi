@@ -2,40 +2,116 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Tilik Psikologi</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-50 p-10">
-    <div class="max-w-4xl mx-auto bg-white p-8 rounded-2xl shadow">
-        <h2 class="text-2xl font-bold mb-6">Hasil Tes Real-time</h2>
-        <table class="w-full text-left">
-            <thead><tr class="bg-slate-100"><th class="p-4">Nama</th><th class="p-4">Tes</th><th class="p-4">Skor</th><th class="p-4">Waktu</th></tr></thead>
-            <tbody id="data-list"></tbody>
-        </table>
-    </div>
+<body class="bg-slate-50 text-slate-900 font-sans">
+
+    <header class="bg-blue-900 text-white py-6 px-8 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold">Dashboard Hasil Asesmen</h1>
+                <p class="text-blue-200 text-sm italic">Fakultas Psikologi Universitas Yudharta Pasuruan</p>
+            </div>
+            <div class="text-right">
+                <p class="text-xs uppercase tracking-widest text-blue-300">Administrator</p>
+                <p class="font-bold">Rafael Ramadhan</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto py-10 px-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border-l-4 border-blue-600">
+                <p class="text-slate-500 text-sm">Total Peserta</p>
+                <h3 id="total-peserta" class="text-3xl font-bold">0</h3>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border-l-4 border-green-600">
+                <p class="text-slate-500 text-sm">Tes Berhasil</p>
+                <h3 id="tes-berhasil" class="text-3xl font-bold text-green-600">0</h3>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <h2 class="font-bold text-lg text-slate-700">Database Hasil Tes (Real-time)</h2>
+                <div class="flex gap-2">
+                    <button onclick="location.reload()" class="bg-white border px-4 py-2 rounded-lg text-xs font-bold hover:bg-slate-100 transition">Refresh</button>
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
+                        <tr>
+                            <th class="p-4">Nama Peserta</th>
+                            <th class="p-4">Alat Tes</th>
+                            <th class="p-4 text-center">Skor / Hasil</th>
+                            <th class="p-4 text-right">Waktu Selesai</th>
+                        </tr>
+                    </thead>
+                    <tbody id="data-display" class="divide-y divide-slate-100 text-sm">
+                        <tr>
+                            <td colspan="4" class="p-10 text-center text-slate-400 italic">Menghubungkan ke server Firebase...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // KREDENSI FIREBASE RAFAEL
         const firebaseConfig = {
             apiKey: "AIzaSyBZsXx_T5-5bKp14BLhuZGNfj4Ils71nVA",
             authDomain: "tilikpsikologi-cbt.firebaseapp.com",
             projectId: "tilikpsikologi-cbt",
             storageBucket: "tilikpsikologi-cbt.firebasestorage.app",
             messagingSenderId: "940142802410",
-            appId: "1:940142802410:web:5e6579568ed2774d9a2e93"
+            appId: "1:940142802410:web:5e6579568ed2774d9a2e93",
+            measurementId: "G-X9KM4DEJJK"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        onSnapshot(collection(db, "hasil_tes"), (snap) => {
-            const list = document.getElementById('data-list'); list.innerHTML = "";
-            snap.forEach(doc => {
-                const d = doc.data();
-                list.innerHTML += `<tr class="border-b"><td class="p-4 font-bold">${d.nama}</td><td class="p-4">${d.tes}</td><td class="p-4 text-blue-600">${d.skor}</td><td class="p-4 text-xs">${d.waktu}</td></tr>`;
+        // Ambil data dari koleksi 'hasil_tes'
+        const q = query(collection(db, "hasil_tes"), orderBy("waktu", "desc"));
+        
+        onSnapshot(q, (snapshot) => {
+            const tableBody = document.getElementById('data-display');
+            tableBody.innerHTML = "";
+            let count = 0;
+
+            if (snapshot.empty) {
+                tableBody.innerHTML = "<tr><td colspan='4' class='p-10 text-center text-slate-400'>Belum ada data masuk.</td></tr>";
+                return;
+            }
+
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                count++;
+                const row = `
+                    <tr class="hover:bg-blue-50/50 transition duration-150">
+                        <td class="p-4 font-bold text-slate-800">${data.nama || 'Tanpa Nama'}</td>
+                        <td class="p-4">
+                            <span class="px-2 py-1 rounded bg-blue-100 text-blue-700 text-[10px] font-black uppercase">
+                                ${data.tes || '-'}
+                            </span>
+                        </td>
+                        <td class="p-4 text-center font-black text-blue-600 text-lg">${data.skor || '0'}</td>
+                        <td class="p-4 text-right text-xs text-slate-400">${data.waktu || '-'}</td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
             });
+
+            document.getElementById('total-peserta').innerText = count;
+            document.getElementById('tes-berhasil').innerText = count;
         });
     </script>
 </body>
