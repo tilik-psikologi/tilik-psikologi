@@ -1,61 +1,129 @@
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tes Kraepelin | Tilik Psikologi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Poppins', sans-serif; user-select: none; }
+        .number-item { font-size: 1.8rem; font-weight: 800; color: #cbd5e1; transition: all 0.3s; }
+        .active-pair { color: #2563eb; transform: scale(1.2); opacity: 1; }
+        .bg-pattern { background-color: #f8fafc; background-image: radial-gradient(#e2e8f0 0.5px, transparent 0.5px); background-size: 20px 20px; }
+    </style>
+</head>
+<body class="bg-pattern text-slate-900 overflow-hidden">
 
-    // Konfigurasi Firebase Rafael
-    const firebaseConfig = { 
-        apiKey: "AIzaSyBZsXx_T5-5bKp14BLhuZGNfj4Ils71nVA", 
-        authDomain: "tilikpsikologi-cbt.firebaseapp.com", 
-        projectId: "tilikpsikologi-cbt", 
-        storageBucket: "tilikpsikologi-cbt.firebasestorage.app", 
-        messagingSenderId: "940142802410", 
-        appId: "1:940142802410:web:5e6579568ed2774d9a2e93" 
-    };
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    <!-- Instruksi -->
+    <div id="instruction-screen" class="min-h-screen flex items-center justify-center p-6 z-50 relative bg-white">
+        <div class="max-w-md w-full text-center">
+            <div class="w-20 h-20 bg-blue-100 text-blue-600 rounded-3xl flex items-center justify-center mx-auto mb-6 text-2xl font-bold">1+1</div>
+            <h2 class="text-2xl font-bold text-blue-900 mb-4">Instruksi Kraepelin</h2>
+            <div class="text-slate-500 text-sm space-y-4 mb-8 text-left leading-relaxed">
+                <p>1. Jumlahkan dua angka yang menyala biru.</p>
+                <p>2. Ketik <strong>Angka Terakhir</strong> saja. <br><span class="italic text-xs text-blue-500">Contoh: 8 + 7 = 15, ketik 5.</span></p>
+                <p>3. Waktu Anda adalah <strong>15 Detik</strong>. Kerjakan secepat mungkin!</p>
+            </div>
+            <button onclick="startTest()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all">Mulai Tes</button>
+        </div>
+    </div>
 
-    let numbers = [];
-    let currentIndex = 0;
-    let score = 0;
-    let timeLeft = 15; // Timer sesuai permintaan
-    let timer;
+    <!-- Konten Tes -->
+    <div id="test-screen" class="hidden min-h-screen flex flex-col items-center justify-center relative">
+        <div class="fixed top-10 flex flex-col items-center bg-white/80 backdrop-blur px-6 py-2 rounded-2xl border">
+            <div id="timer" class="text-4xl font-black text-red-600">15</div>
+            <div class="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Detik Tersisa</div>
+        </div>
 
-    // Fungsi perbaikan: Memastikan auto-focus dan sinkronisasi data
-    document.getElementById('ans-input').addEventListener('input', async (e) => {
-        const val = parseInt(e.target.value);
-        const correct = (numbers[currentIndex] + numbers[currentIndex+1]) % 10;
-        
-        if(!isNaN(val)) {
-            if(val === correct) score++;
-            currentIndex++;
-            e.target.value = '';
-            
-            // Efek visual: Scroll otomatis ke atas (seperti tes koran asli)
+        <div class="flex flex-col items-center mt-20">
+            <div id="number-column" class="flex flex-col-reverse gap-8 items-center transition-all duration-300">
+                <!-- Angka di-generate JS -->
+            </div>
+        </div>
+
+        <div class="fixed bottom-10">
+            <input type="number" id="ans-input" class="w-24 bg-white border-b-4 border-blue-600 text-center text-5xl font-bold py-2 outline-none" placeholder="?" autofocus>
+        </div>
+    </div>
+
+    <!-- Hasil -->
+    <div id="result-screen" class="hidden min-h-screen flex items-center justify-center p-6">
+        <div class="bg-white p-10 rounded-[2.5rem] shadow-2xl border text-center max-w-sm w-full">
+            <h2 class="text-xl font-bold text-blue-900 mb-6">Hasil Tes</h2>
+            <div class="bg-blue-50 p-8 rounded-3xl mb-8">
+                <p class="text-xs font-bold text-blue-600 uppercase mb-2">Skor Benar</p>
+                <h3 id="final-score" class="text-6xl font-black text-blue-900">0</h3>
+            </div>
+            <a href="index.html" class="block w-full text-slate-400 hover:text-blue-600 underline text-sm">Kembali ke Beranda</a>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyBZsXx_T5-5bKp14BLhuZGNfj4Ils71nVA", authDomain: "tilikpsikologi-cbt.firebaseapp.com", projectId: "tilikpsikologi-cbt", storageBucket: "tilikpsikologi-cbt.firebasestorage.app", messagingSenderId: "940142802410", appId: "1:940142802410:web:5e6579568ed2774d9a2e93" };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let numbers = [];
+        let currentIndex = 0;
+        let score = 0;
+        let timeLeft = 15;
+        let timer;
+
+        function generateNumbers() {
             const col = document.getElementById('number-column');
-            col.style.transform = `translateY(${currentIndex * 48}px)`;
-            updateHighlight();
-        }
-    });
-
-    async function finish() {
-        clearInterval(timer);
-        const nama = localStorage.getItem("nama_peserta") || "Anonim";
-        const waktu = new Date().toLocaleString("id-ID");
-
-        try {
-            // Mengirim ke koleksi hasil_tes
-            await addDoc(collection(db, "hasil_tes"), { 
-                nama, 
-                tes: "Kraepelin", 
-                skor: score, 
-                waktu: waktu 
+            numbers = Array.from({length: 100}, () => Math.floor(Math.random() * 9) + 1);
+            numbers.forEach((n, i) => {
+                const div = document.createElement('div');
+                div.className = "number-item";
+                div.id = `num-${i}`;
+                div.innerText = n;
+                col.appendChild(div);
             });
-            document.getElementById('test-content').classList.add('hidden');
-            document.getElementById('result-screen').classList.remove('hidden');
-            document.getElementById('final-skor').innerText = score;
-        } catch (e) {
-            alert("Gagal menyimpan hasil. Pastikan domain sudah di-Authorized di Firebase!");
+            updateUI();
         }
-    }
-    // ... sisa fungsi startTest tetap sama
-</script>
+
+        function updateUI() {
+            document.querySelectorAll('.number-item').forEach(el => el.classList.remove('active-pair'));
+            document.getElementById(`num-${currentIndex}`).classList.add('active-pair');
+            document.getElementById(`num-${currentIndex+1}`).classList.add('active-pair');
+            document.getElementById('number-column').style.transform = `translateY(${currentIndex * 68}px)`;
+        }
+
+        window.startTest = () => {
+            document.getElementById('instruction-screen').classList.add('hidden');
+            document.getElementById('test-screen').classList.remove('hidden');
+            document.getElementById('ans-input').focus();
+            generateNumbers();
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').innerText = timeLeft;
+                if(timeLeft <= 0) finish();
+            }, 1000);
+        };
+
+        document.getElementById('ans-input').addEventListener('input', (e) => {
+            const val = parseInt(e.target.value);
+            const correct = (numbers[currentIndex] + numbers[currentIndex+1]) % 10;
+            if(!isNaN(val)) {
+                if(val === correct) score++;
+                currentIndex++;
+                e.target.value = '';
+                updateUI();
+            }
+        });
+
+        async function finish() {
+            clearInterval(timer);
+            const nama = localStorage.getItem("nama_peserta") || "Peserta";
+            await addDoc(collection(db, "hasil_tes"), { nama, tes: "Kraepelin", skor: score, waktu: new Date().toLocaleString() });
+            document.getElementById('test-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            document.getElementById('final-score').innerText = score;
+        }
+    </script>
+</body>
+</html>
