@@ -2,39 +2,64 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Dashboard</title>
+    <title>Admin Dashboard | Tilik Psikologi</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-50 p-10">
-    <div class="max-w-4xl mx-auto bg-white p-8 rounded-2xl shadow">
-        <h2 class="text-2xl font-bold mb-6">Hasil Tes Real-time</h2>
-        <table class="w-full text-left">
-            <thead><tr class="bg-slate-100"><th class="p-4">Nama</th><th class="p-4">Tes</th><th class="p-4">Skor</th><th class="p-4">Waktu</th></tr></thead>
-            <tbody id="data-list"></tbody>
-        </table>
-    </div>
+<body class="bg-slate-50 text-slate-900">
+    <header class="bg-blue-900 text-white p-6 shadow-md">
+        <h1 class="text-xl font-bold">Hasil Asesmen Tilik Psikologi</h1>
+        <p class="text-xs opacity-70">Admin: Rafael Ramadhan | Univ. Yudharta Pasuruan</p>
+    </header>
+
+    <main class="p-8">
+        <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+            <table class="w-full text-left">
+                <thead class="bg-slate-100 text-xs font-bold uppercase text-slate-500">
+                    <tr>
+                        <th class="p-4">Nama Peserta</th>
+                        <th class="p-4">Tes</th>
+                        <th class="p-4 text-center">Skor</th>
+                        <th class="p-4 text-right">Waktu</th>
+                    </tr>
+                </thead>
+                <tbody id="data-display" class="divide-y text-sm">
+                    <tr><td colspan="4" class="p-10 text-center italic">Memuat data dari Firebase...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // KREDENSI DARI SCREENSHOT (159)
         const firebaseConfig = {
             apiKey: "AIzaSyBZsXx_T5-5bKp14BLhuZGNfj4Ils71nVA",
             authDomain: "tilikpsikologi-cbt.firebaseapp.com",
             projectId: "tilikpsikologi-cbt",
             storageBucket: "tilikpsikologi-cbt.firebasestorage.app",
             messagingSenderId: "940142802410",
-            appId: "1:940142802410:web:5e6579568ed2774d9a2e93"
+            appId: "1:940142802410:web:5e6579568ed2774d9a2e93",
+            measurementId: "G-X9KM4DEJJK"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const q = query(collection(db, "hasil_tes"), orderBy("waktu", "desc"));
 
-        onSnapshot(collection(db, "hasil_tes"), (snap) => {
-            const list = document.getElementById('data-list'); list.innerHTML = "";
-            snap.forEach(doc => {
+        onSnapshot(q, (snapshot) => {
+            const tableBody = document.getElementById('data-display');
+            tableBody.innerHTML = "";
+            snapshot.forEach((doc) => {
                 const d = doc.data();
-                list.innerHTML += `<tr class="border-b"><td class="p-4 font-bold">${d.nama}</td><td class="p-4">${d.tes}</td><td class="p-4 text-blue-600">${d.skor}</td><td class="p-4 text-xs">${d.waktu}</td></tr>`;
+                tableBody.innerHTML += `
+                    <tr class="hover:bg-blue-50">
+                        <td class="p-4 font-bold text-blue-900">${d.nama || 'Anonim'}</td>
+                        <td class="p-4"><span class="bg-slate-200 px-2 py-0.5 rounded text-[10px]">${d.tes || '-'}</span></td>
+                        <td class="p-4 text-center font-black">${d.skor || '0'}</td>
+                        <td class="p-4 text-right text-slate-400 text-xs">${d.waktu || '-'}</td>
+                    </tr>`;
             });
         });
     </script>
