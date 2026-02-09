@@ -16,59 +16,98 @@
             overflow-x: hidden;
             touch-action: manipulation;
         }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .btn-m { background-color: #1e293b; border: 1px solid #334155; transition: all 0.2s; -webkit-tap-highlight-color: transparent; }
-        .btn-m.selected { background-color: #059669; border-color: #10b981; color: white; box-shadow: 0 0 15px rgba(16, 185, 129, 0.4); }
-        .btn-l { background-color: #1e293b; border: 1px solid #334155; transition: all 0.2s; -webkit-tap-highlight-color: transparent; }
-        .btn-l.selected { background-color: #dc2626; border-color: #ef4444; color: white; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
+        .glass { 
+            background: rgba(30, 41, 59, 0.7); 
+            backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+        }
         
+        /* Tombol Pilihan */
+        .btn-choice {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.75rem;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            background-color: #1e293b;
+            border: 2px solid #334155;
+            flex-shrink: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn-m.selected { 
+            background-color: #059669; 
+            border-color: #10b981; 
+            color: white; 
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);
+            transform: scale(1.1);
+        }
+        
+        .btn-l.selected { 
+            background-color: #dc2626; 
+            border-color: #ef4444; 
+            color: white; 
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.5);
+            transform: scale(1.1);
+        }
+
         /* Animasi Transisi */
         .fade-in { animation: fadeIn 0.4s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Scrollbar kustom untuk hasil */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center p-4">
 
     <!-- Layar Instruksi -->
-    <div id="instruction-screen" class="fixed inset-0 z-[150] bg-slate-950 flex items-center justify-center p-6 text-center">
+    <div id="instruction-screen" class="fixed inset-0 z-[150] bg-slate-950 flex items-center justify-center p-4 text-center">
         <div class="max-w-md w-full bg-[#1e293b] rounded-[2.5rem] p-8 border border-[#334155] shadow-2xl">
-            <div class="w-20 h-20 bg-blue-600 text-white rounded-3xl flex items-center justify-center mx-auto mb-6 text-3xl font-black shadow-lg">M/L</div>
-            <h2 class="text-2xl font-bold mb-4">Instruksi Tes DISC</h2>
-            <div class="text-slate-400 text-sm mb-8 leading-relaxed text-left space-y-3">
-                <p>1. Terdapat 24 kelompok pernyataan.</p>
-                <p>2. Pilih satu pernyataan yang <strong>Paling Sesuai (M)</strong> menggambarkan diri Anda.</p>
-                <p>3. Pilih satu pernyataan yang <strong>Paling Tidak Sesuai (L)</strong> menggambarkan diri Anda.</p>
-                <p>4. Jawab berdasarkan situasi <strong>Kerja/Profesional</strong> secara spontan.</p>
+            <div class="w-16 h-16 bg-blue-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-6 text-2xl font-black shadow-lg shadow-blue-900/20">M/L</div>
+            <h2 class="text-xl font-bold mb-4">Instruksi Asesmen DISC</h2>
+            <div class="text-slate-400 text-sm mb-8 leading-relaxed text-left space-y-4">
+                <p>1. Terdapat 24 kelompok pernyataan perilaku.</p>
+                <p>2. Pilih satu pernyataan yang <strong>Paling (M - Most)</strong> menggambarkan diri Anda.</p>
+                <p>3. Pilih satu pernyataan yang <strong>Paling Tidak (L - Least)</strong> menggambarkan diri Anda.</p>
+                <p>4. Gunakan perspektif diri Anda dalam lingkungan <strong>Profesional/Kerja</strong>.</p>
             </div>
-            <button onclick="startTest()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-blue-700 active:scale-95 transition-all">Mulai Asesmen</button>
+            <button onclick="startTest()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-blue-700 active:scale-95 transition-all">Mulai Tes</button>
         </div>
     </div>
 
     <!-- Header & Progress -->
-    <div id="test-header" class="hidden w-full max-w-2xl mb-6 mt-2 flex justify-between items-end px-2">
+    <div id="test-header" class="hidden w-full max-w-2xl mb-6 mt-2 px-2 flex justify-between items-end">
         <div>
-            <h1 class="text-lg font-black text-white leading-none">Tes <span class="text-blue-500">DISC</span></h1>
+            <h1 class="text-lg font-black text-white">Tes <span class="text-blue-500">DISC</span></h1>
             <p id="progress-text" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Kelompok 1 / 24</p>
         </div>
-        <div class="w-1/2 bg-slate-800 h-1.5 rounded-full overflow-hidden mb-1">
+        <div class="w-1/2 bg-slate-800 h-1 rounded-full overflow-hidden mb-1">
             <div id="progress-bar" class="bg-blue-600 h-full transition-all duration-500" style="width: 4%"></div>
         </div>
     </div>
 
-    <!-- Main Test Area -->
-    <div id="test-container" class="hidden w-full max-w-2xl glass rounded-[2.5rem] p-4 md:p-8 shadow-2xl fade-in">
-        <div class="grid grid-cols-12 gap-2 mb-4 text-center text-[9px] font-black uppercase tracking-tighter text-slate-500">
-            <div class="col-span-8 text-left pl-2">Pernyataan</div>
-            <div class="col-span-2">M</div>
-            <div class="col-span-2">L</div>
+    <!-- Area Utama Tes -->
+    <div id="test-container" class="hidden w-full max-w-2xl glass rounded-[2.5rem] p-4 md:p-10 shadow-2xl fade-in">
+        <!-- Label Kolom -->
+        <div class="flex items-center gap-3 px-3 mb-4 text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">
+            <div class="flex-grow">Pernyataan Perilaku</div>
+            <div class="w-[44px] text-center">Most</div>
+            <div class="w-[44px] text-center">Least</div>
         </div>
 
         <div id="options-list" class="space-y-3">
-            <!-- Items generated here -->
+            <!-- Baris pernyataan diisi via JavaScript -->
         </div>
 
-        <div class="mt-8 flex flex-col gap-4 items-center">
-            <p class="text-[10px] text-slate-500 italic text-center">Wajib pilih satu M dan satu L di setiap kelompok.</p>
+        <div class="mt-10 flex flex-col gap-4 items-center">
+            <p class="text-[10px] text-slate-500 italic text-center px-4">Pastikan Anda memilih satu di kolom M dan satu di kolom L sebelum melanjutkan.</p>
             <button id="next-btn" onclick="nextGroup()" disabled class="w-full bg-blue-600 disabled:bg-slate-800 disabled:text-slate-500 text-white py-4 rounded-2xl font-bold shadow-xl transition-all active:scale-95">
                 Lanjut Kelompok
             </button>
@@ -76,42 +115,43 @@
     </div>
 
     <!-- Layar Hasil -->
-    <div id="result-screen" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-6 bg-slate-950 overflow-y-auto">
-        <div class="text-center w-full max-w-xl py-12">
+    <div id="result-screen" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-950 overflow-y-auto">
+        <div class="text-center w-full max-w-xl py-10">
             <h2 class="text-3xl font-black text-white mb-2 tracking-tight">Analisis Selesai</h2>
-            <p class="text-slate-500 mb-8 text-sm">Hasil profil kepribadian simulasi Anda:</p>
+            <p class="text-slate-500 mb-8 text-sm">Berikut profil kepribadian profesional Anda:</p>
             
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-                <div class="bg-slate-900 border border-slate-800 p-5 rounded-3xl">
-                    <p class="text-xs font-bold text-red-500 mb-1">D</p>
+                <div class="bg-slate-900 border border-slate-800 p-5 rounded-[2rem]">
+                    <p class="text-[10px] font-bold text-red-500 mb-1 uppercase tracking-widest">Dominance</p>
                     <h3 id="score-D" class="text-3xl font-black">0</h3>
                 </div>
-                <div class="bg-slate-900 border border-slate-800 p-5 rounded-3xl">
-                    <p class="text-xs font-bold text-yellow-500 mb-1">I</p>
+                <div class="bg-slate-900 border border-slate-800 p-5 rounded-[2rem]">
+                    <p class="text-[10px] font-bold text-yellow-500 mb-1 uppercase tracking-widest">Influence</p>
                     <h3 id="score-I" class="text-3xl font-black">0</h3>
                 </div>
-                <div class="bg-slate-900 border border-slate-800 p-5 rounded-3xl">
-                    <p class="text-xs font-bold text-emerald-500 mb-1">S</p>
+                <div class="bg-slate-900 border border-slate-800 p-5 rounded-[2rem]">
+                    <p class="text-[10px] font-bold text-emerald-500 mb-1 uppercase tracking-widest">Steadiness</p>
                     <h3 id="score-S" class="text-3xl font-black">0</h3>
                 </div>
-                <div class="bg-slate-900 border border-slate-800 p-5 rounded-3xl">
-                    <p class="text-xs font-bold text-blue-500 mb-1">C</p>
+                <div class="bg-slate-900 border border-slate-800 p-5 rounded-[2rem]">
+                    <p class="text-[10px] font-bold text-blue-500 mb-1 uppercase tracking-widest">Compliance</p>
                     <h3 id="score-C" class="text-3xl font-black">0</h3>
                 </div>
             </div>
 
-            <div class="bg-blue-900/20 border border-blue-800/50 p-6 rounded-[2rem] text-left mb-8">
-                <h4 class="text-blue-400 font-bold text-xs uppercase tracking-widest mb-3 flex items-center gap-2">
-                    Kesimpulan Dominan
-                </h4>
-                <p id="conclusion-text" class="text-slate-200 text-xs leading-relaxed">Menganalisis...</p>
+            <div class="bg-blue-900/20 border border-blue-800/50 p-6 rounded-[2.5rem] text-left mb-8">
+                <h4 class="text-blue-400 font-bold text-[10px] uppercase tracking-widest mb-3 flex items-center gap-2">Interpretasi Hasil</h4>
+                <p id="conclusion-text" class="text-slate-200 text-xs leading-relaxed">Menganalisis profil...</p>
             </div>
 
             <div class="flex flex-col gap-3">
                 <button onclick="downloadPDF()" class="w-full py-4 bg-emerald-600 text-white rounded-2xl font-bold text-lg flex items-center justify-center gap-2">
-                    Unduh Laporan PDF
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Unduh Hasil PDF
                 </button>
-                <a href="index.html" class="text-slate-500 font-bold text-sm uppercase py-4">Beranda</a>
+                <a href="index.html" class="text-slate-500 font-bold text-sm uppercase py-4 tracking-widest">Kembali ke Beranda</a>
             </div>
         </div>
     </div>
@@ -169,11 +209,11 @@
             list.innerHTML = "";
             group.opts.forEach((o, i) => {
                 const div = document.createElement('div');
-                div.className = "grid grid-cols-12 gap-2 items-center bg-slate-900/40 p-3 rounded-2xl border border-slate-800 fade-in";
+                div.className = "flex items-center gap-3 bg-slate-900/40 p-4 rounded-2xl border border-slate-800 fade-in";
                 div.innerHTML = `
-                    <div class="col-span-8 text-[11px] font-medium text-slate-200 leading-tight">${o.t}</div>
-                    <div class="col-span-2 flex justify-center"><button onclick="setM(${i})" class="btn-m w-9 h-9 rounded-full font-bold text-xs ${selectedM === i ? 'selected' : ''}">M</button></div>
-                    <div class="col-span-2 flex justify-center"><button onclick="setL(${i})" class="btn-l w-9 h-9 rounded-full font-bold text-xs ${selectedL === i ? 'selected' : ''}">L</button></div>
+                    <div class="flex-grow text-[11px] md:text-sm font-medium text-slate-200 leading-snug">${o.t}</div>
+                    <button onclick="setM(${i})" class="btn-choice btn-m ${selectedM === i ? 'selected' : ''}">M</button>
+                    <button onclick="setL(${i})" class="btn-choice btn-l ${selectedL === i ? 'selected' : ''}">L</button>
                 `;
                 list.appendChild(div);
             });
@@ -194,17 +234,16 @@
             const max = Math.max(scores.D, scores.I, scores.S, scores.C);
             const p = Object.keys(scores).find(k => scores[k] === max);
             const map = {
-                D: "Anda memiliki gaya Dominan yang kuat. Fokus pada hasil, tegas, dan menyukai tantangan.",
-                I: "Anda memiliki gaya Influencing yang menonjol. Antusias, komunikatif, dan persuasif.",
-                S: "Anda memiliki gaya Steadiness yang dominan. Sabar, stabil, dan pendengar yang baik.",
-                C: "Anda memiliki gaya Compliance yang kuat. Teliti, analitis, dan sangat memperhatikan detail."
+                D: "Anda menonjol dalam gaya Dominance. Anda cenderung fokus pada hasil, berani mengambil risiko, dan tegas dalam pengambilan keputusan profesional.",
+                I: "Anda menonjol dalam gaya Influence. Anda antusias, komunikatif, dan sangat pandai dalam membangun jaringan serta memotivasi rekan kerja.",
+                S: "Anda menonjol dalam gaya Steadiness. Anda adalah pribadi yang sabar, stabil, setia, dan pendengar yang sangat baik dalam lingkungan tim.",
+                C: "Anda menonjol dalam gaya Compliance. Anda bekerja secara sistematis, sangat teliti terhadap detail, dan menjunjung tinggi standar kualitas."
             };
-            return map[p] || "Profil Anda menunjukkan keseimbangan di beberapa dimensi.";
+            return map[p] || "Profil Anda menunjukkan keseimbangan di beberapa dimensi perilaku.";
         }
 
         async function finish() {
             const nama = localStorage.getItem("nama_peserta") || "Peserta";
-            const conc = getConclusion();
             try {
                 await addDoc(collection(db, "hasil_tes"), { nama, tes: "DISC", skor: `D:${scores.D}, I:${scores.I}, S:${scores.S}, C:${scores.C}`, waktu: new Date().toLocaleString('id-ID') });
             } catch (e) {}
@@ -212,20 +251,22 @@
             document.getElementById('test-container').classList.add('hidden');
             document.getElementById('result-screen').classList.remove('hidden');
             ['D','I','S','C'].forEach(k => document.getElementById(`score-${k}`).innerText = scores[k]);
-            document.getElementById('conclusion-text').innerText = conc;
+            document.getElementById('conclusion-text').innerText = getConclusion();
         }
 
         window.downloadPDF = () => {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             const nama = localStorage.getItem("nama_peserta") || "Peserta";
-            doc.setFontSize(22); doc.setTextColor(30, 64, 175); doc.text("HASIL ASESMEN DISC", 20, 30);
-            doc.setFontSize(11); doc.setTextColor(0, 0, 0); doc.text(`Nama: ${nama}`, 20, 50);
+            
+            doc.setFontSize(22); doc.setTextColor(30, 64, 175); doc.text("LAPORAN ASESMEN DISC", 20, 30);
+            doc.setFontSize(12); doc.setTextColor(0,0,0); doc.text(`Nama: ${nama}`, 20, 50);
             doc.text(`Skor Most (M): D:${scores.D}, I:${scores.I}, S:${scores.S}, C:${scores.C}`, 20, 60);
-            const split = doc.splitTextToSize(`Interpretasi Dominan: ${getConclusion()}`, 170);
+            const split = doc.splitTextToSize(`Interpretasi: ${getConclusion()}`, 170);
             doc.text(split, 20, 80);
+            
             doc.setDrawColor(220, 0, 0); doc.rect(15, 210, 180, 50); doc.setFontSize(8);
-            const disc = "Simulasi ini hanya untuk edukasi. Pernyataan dan metode skoring ini disederhanakan dan tidak dapat dijadikan dasar untuk asesmen psikologis resmi atau seleksi karyawan. Untuk analisis akurat, konsultasikan dengan psikolog bersertifikasi.";
+            const disc = "Simulasi ini hanya untuk edukasi. Hasil tidak dapat dijadikan dasar asesmen psikologis resmi atau seleksi karyawan. Untuk analisis akurat, konsultasikan dengan psikolog bersertifikasi.";
             doc.text(doc.splitTextToSize(`DISCLAIMER: ${disc}`, 170), 20, 225);
             doc.save(`Hasil_DISC_${nama}.pdf`);
         };
