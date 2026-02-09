@@ -38,7 +38,6 @@
             <span class="text-xs font-bold text-slate-400">📊 Skor:</span>
             <span id="live-score" class="text-xl font-black text-blue-400">0</span>
         </div>
-        <!-- Menampilkan 6:00 sebagai awal -->
         <div id="timer" class="text-2xl font-black text-slate-300">6:00</div>
     </div>
 
@@ -53,7 +52,7 @@
                 <p>1. Jumlahkan dua angka yang muncul secara vertikal (Atas + Bawah).</p>
                 <p>2. Ambil <strong>angka terakhir</strong> saja. (Contoh: 8+7=15, tekan 5).</p>
                 <p>3. Pengerjaan dilakukan dari kiri ke kanan baris angka.</p>
-                <p>4. Waktu pengerjaan total adalah <strong>6 menit</strong>.</p>
+                <p>4. Waktu pengerjaan total adalah <span class="text-blue-400 font-bold">6 Menit</span>.</p>
                 <p>5. Gunakan Numpad layar atau Keyboard untuk menjawab.</p>
             </div>
             <button onclick="startTest()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-blue-700 transition-all">Mulai Tes Sekarang</button>
@@ -121,7 +120,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Data dari KREAPELIN.docx (22 baris x 50 kolom)
         const rowData = [
             "5 7 3 9 2 8 4 6 1 5 8 2 7 3 9 4 6 1 5 7 3 8 2 9 4 6 1 5 7 3 9 2 8 4 6 1 5 7 3 8 2 9 4 6 1 5 7 3 9 2",
             "8 4 6 1 5 7 3 9 2 8 4 6 1 5 7 3 9 2 8 4 6 1 5 7 3 9 2 8 4 6 1 5 7 3 9 2 8 4 6 1 5 7 3 9 2 8 4 6 1 5",
@@ -147,7 +145,6 @@
             "7 3 8 2 9 4 6 1 5 7 3 8 2 9 4 6 1 5 7 3 8 2 9 4 6 1 5 7 3 8 2 9 4 6 1 5 7 3 8 2 9 4 6 1 5 7 3 8 2 9"
         ];
 
-        // Parsing data ke dalam pasangan (1-2, 3-4, dst)
         let pairs = [];
         for (let i = 0; i < rowData.length; i += 2) {
             let top = rowData[i].split(" ").map(Number);
@@ -158,7 +155,7 @@
         let currentPairIdx = 0;
         let currentColIdx = 0;
         let score = 0;
-        let timeLeft = 360; // Diubah menjadi 360 detik (6 menit)
+        let timeLeft = 360; // TERKUNCI: 6 Menit
         let isFinished = false;
         let timer;
 
@@ -167,7 +164,6 @@
             document.getElementById('num-top').innerText = pair.top[currentColIdx];
             document.getElementById('num-bottom').innerText = pair.bottom[currentColIdx];
             
-            // Preview angka berikutnya
             if (currentColIdx < 49) {
                 document.getElementById('num-next').innerText = `Berikutnya: ${pair.top[currentColIdx + 1]} + ${pair.bottom[currentColIdx + 1]}`;
             } else if (currentPairIdx < pairs.length - 1) {
@@ -190,7 +186,6 @@
                 document.getElementById('live-score').innerText = score;
             }
             
-            // Navigasi
             currentColIdx++;
             if (currentColIdx >= 50) {
                 currentColIdx = 0;
@@ -218,7 +213,9 @@
                 timeLeft--;
                 const minutes = Math.floor(timeLeft / 60);
                 const seconds = timeLeft % 60;
+                // Update tampilan timer MM:SS
                 document.getElementById('timer').innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                
                 if (timeLeft <= 0) finishTest();
             }, 1000);
         };
@@ -270,7 +267,6 @@
             doc.setFont("helvetica", "normal");
             doc.text(`Peserta mampu menyelesaikan ${score} soal dalam durasi simulasi 6 menit.`, 30, 115);
 
-            // DISCLAIMER BOX - MANDATORY
             doc.setDrawColor(220, 0, 0);
             doc.setLineWidth(0.8);
             doc.rect(15, 210, 180, 50);
