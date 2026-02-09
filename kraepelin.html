@@ -7,160 +7,96 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: 'Poppins', sans-serif; user-select: none; background-color: #fdfdfd; }
+        body { font-family: 'Poppins', sans-serif; user-select: none; background-color: #0f172a; color: white; }
         
-        /* Gaya Item Angka - Ukuran diperbesar (Zoomed In Look) */
-        .number-item { 
-            font-size: 4rem; 
-            font-weight: 900; 
-            color: #e2e8f0; 
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            height: 120px; 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            letter-spacing: -0.05em;
+        .numpad-btn {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            transition: all 0.1s ease;
         }
-
-        /* Gaya Angka Aktif */
-        .active-pair { 
-            color: #1e40af; 
-            transform: scale(1.15);
-            filter: drop-shadow(0 0 12px rgba(30, 64, 175, 0.15));
+        .numpad-btn:active {
+            background-color: #334155;
+            transform: scale(0.95);
         }
-
-        /* Latar Belakang Digital */
-        .bg-mesh {
-            background-color: #ffffff;
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.05) 0px, transparent 50%),
-                radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.05) 0px, transparent 50%);
+        .number-card {
+            background-color: #1e293b;
+            border: 1px solid #334155;
         }
-
-        /* Animasi Kolom */
-        #number-column {
-            transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-
-        /* Glassmorphism Effect */
-        .glass {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        /* Scanning Line - Lebih halus agar tidak mengganggu pandangan */
-        .scan-line {
-            height: 2px;
-            background: linear-gradient(90deg, transparent, rgba(30, 64, 175, 0.1), transparent);
-            width: 100%;
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
+        /* Animasi Transisi Angka */
+        .number-animation {
+            transition: all 0.2s ease-out;
         }
     </style>
 </head>
-<body class="bg-mesh text-slate-900 overflow-hidden min-h-screen">
+<body class="min-h-screen flex flex-col items-center overflow-hidden">
+
+    <!-- Header (Skor & Timer) -->
+    <div id="test-header" class="w-full max-w-md px-6 py-6 flex justify-between items-center opacity-0 transition-opacity duration-500">
+        <div class="bg-[#1e293b] px-4 py-2 rounded-lg border border-[#334155] flex items-center gap-2">
+            <span class="text-xs font-bold text-slate-400">📊 Skor:</span>
+            <span id="live-score" class="text-xl font-black text-blue-400">0</span>
+        </div>
+        <div id="timer" class="text-2xl font-black text-slate-300">15</div>
+    </div>
 
     <!-- Layar Instruksi -->
-    <div id="instruction-screen" class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm">
-        <div class="max-w-md w-full bg-white rounded-[3rem] p-12 shadow-2xl border border-slate-100 text-center">
-            <div class="w-24 h-24 bg-indigo-600 text-white rounded-3xl flex items-center justify-center mx-auto mb-8 text-4xl font-black shadow-xl shadow-indigo-200 rotate-3">
-                12
+    <div id="instruction-screen" class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#0f172a]">
+        <div class="max-w-sm w-full text-center">
+            <div class="w-20 h-20 bg-blue-600 text-white rounded-3xl flex items-center justify-center mx-auto mb-8 text-3xl font-black shadow-xl shadow-blue-900/20">
+                +
             </div>
-            <h2 class="text-3xl font-extrabold text-slate-900 mb-4 tracking-tight">Tes Kraepelin</h2>
-            <div class="text-slate-500 text-sm space-y-5 mb-12 text-left leading-relaxed">
-                <div class="flex gap-4">
-                    <span class="flex-shrink-0 w-7 h-7 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center font-bold text-xs">1</span>
-                    <p>Jumlahkan <span class="text-slate-900 font-semibold underline decoration-indigo-200 decoration-4">dua angka biru</span> besar di tengah.</p>
-                </div>
-                <div class="flex gap-4">
-                    <span class="flex-shrink-0 w-7 h-7 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center font-bold text-xs">2</span>
-                    <p>Input <span class="text-slate-900 font-semibold underline decoration-indigo-200 decoration-4">angka terakhir</span> saja. <br><span class="text-xs text-indigo-500">Misal: 9+6=15, ketik 5.</span></p>
-                </div>
-                <div class="flex gap-4">
-                    <span class="flex-shrink-0 w-7 h-7 bg-red-50 text-red-600 rounded-full flex items-center justify-center font-bold text-xs">3</span>
-                    <p>Waktu terbatas: <span class="text-red-600 font-bold">15 Detik</span>.</p>
-                </div>
+            <h2 class="text-2xl font-bold mb-4">Instruksi Tes</h2>
+            <div class="text-slate-400 text-sm space-y-4 mb-10 text-left leading-relaxed">
+                <p>1. Jumlahkan dua angka yang muncul secara vertikal.</p>
+                <p>2. Ambil <strong>angka terakhir</strong> saja. (Contoh: 8+7=15, tekan 5).</p>
+                <p>3. Tekan angka pada numpad atau keyboard untuk menjawab.</p>
             </div>
-            <button id="btn-start" class="w-full bg-indigo-600 text-white py-5 rounded-2xl font-bold text-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 active:scale-95 transition-all duration-300">
-                Mulai Tes
-            </button>
+            <button onclick="startTest()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-blue-700 transition-all">Mulai Tes</button>
         </div>
     </div>
 
-    <!-- Interface Tes -->
-    <div id="test-screen" class="hidden min-h-screen flex flex-col items-center justify-center relative">
-        <!-- Floating Status Bar -->
-        <div class="fixed top-8 left-1/2 -translate-x-1/2 w-full max-w-sm flex justify-between items-center px-8 py-5 glass rounded-[2.5rem] border shadow-md z-50">
-            <div class="flex flex-col">
-                <span class="text-[10px] uppercase font-black text-slate-400 tracking-widest">Sisa Waktu</span>
-                <span id="timer" class="text-3xl font-black text-red-600">15</span>
-            </div>
-            <div class="h-10 w-[1px] bg-slate-200"></div>
-            <div class="flex flex-col items-end">
-                <span class="text-[10px] uppercase font-black text-slate-400 tracking-widest">Status</span>
-                <span class="text-2xl font-black text-indigo-600">Aktif</span>
-            </div>
+    <!-- Area Tes (Style Screenshot 181) -->
+    <div id="test-screen" class="hidden flex-grow flex flex-col items-center justify-center w-full max-w-md px-6">
+        
+        <!-- Kartu Angka Utama -->
+        <div class="number-card w-full rounded-3xl p-12 mb-8 flex flex-col items-center relative overflow-hidden">
+            <div id="num-top" class="text-6xl font-black mb-2 text-white">8</div>
+            <div id="num-bottom" class="text-6xl font-black text-white">7</div>
+            <div class="text-4xl font-bold text-slate-500 my-2">+</div>
+            <div id="num-next" class="text-4xl font-black text-slate-600 opacity-50">1</div>
         </div>
 
-        <!-- Kolom Tes (Container Utama) -->
-        <div class="relative h-[550px] w-full max-w-md flex items-center justify-center overflow-hidden">
-            <div id="number-column" class="flex flex-col items-center">
-                <!-- Angka di-generate via JS -->
-            </div>
-            
-            <!-- Focus Guide (Kotak Penanda yang Diperbaiki) -->
-            <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
-                <!-- Kotak Luar -->
-                <div class="w-[85%] h-[260px] border-2 border-indigo-600/10 bg-indigo-50/5 rounded-[3rem] shadow-inner relative">
-                    <!-- Garis Penjepit (Bracket) agar lebih jelas -->
-                    <div class="absolute top-4 bottom-4 left-4 w-1 border-y-2 border-l-2 border-indigo-400/40 rounded-l-lg"></div>
-                    <div class="absolute top-4 bottom-4 right-4 w-1 border-y-2 border-r-2 border-indigo-400/40 rounded-r-lg"></div>
-                </div>
-                <!-- Garis Tengah (Opsional, untuk memisahkan dua angka secara visual) -->
-                <div class="absolute w-[70%] h-[1px] bg-indigo-100/30"></div>
-            </div>
-        </div>
-
-        <!-- Input Panel Besar -->
-        <div class="fixed bottom-10 w-full max-w-sm px-8">
-            <div class="relative group">
-                <input type="number" id="ans-input" 
-                    class="w-full bg-white border-2 border-slate-100 text-center text-7xl font-black py-8 rounded-[3rem] shadow-2xl outline-none focus:border-indigo-500 focus:ring-[16px] focus:ring-indigo-50 transition-all duration-300" 
-                    placeholder="?" 
-                    inputmode="numeric"
-                    autocomplete="off">
-                <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-indigo-600 text-white text-xs font-bold px-6 py-1.5 rounded-full uppercase tracking-widest shadow-lg">
-                    Jawaban
-                </div>
+        <!-- Numpad Grid -->
+        <div class="grid grid-cols-3 gap-3 w-full mb-8">
+            <button onclick="handleInput(1)" class="numpad-btn h-20 rounded-2xl text-3xl font-bold">1</button>
+            <button onclick="handleInput(2)" class="numpad-btn h-20 rounded-2xl text-3xl font-bold">2</button>
+            <button onclick="handleInput(3)" class="numpad-btn h-20 rounded-2xl text-3xl font-bold">3</button>
+            <button onclick="handleInput(4)" class="numpad-btn h-20 rounded-2xl text-3xl font-bold">4</button>
+            <button onclick="handleInput(5)" class="numpad-btn h-20 rounded-2xl text-3xl font-bold">5</button>
+            <button onclick="handleInput(6)" class="numpad-btn h-20 rounded-2xl text-3xl font-bold">6</button>
+            <button onclick="handleInput(7)" class="numpad-btn h-20 rounded-2xl text-3xl font-bold">7</button>
+            <button onclick="handleInput(8)" class="numpad-btn h-20 rounded-2xl text-3xl font-bold">8</button>
+            <button onclick="handleInput(9)" class="numpad-btn h-20 rounded-2xl text-3xl font-bold">9</button>
+            <div class="col-start-2">
+                <button onclick="handleInput(0)" class="numpad-btn h-20 w-full rounded-2xl text-3xl font-bold">0</button>
             </div>
         </div>
     </div>
 
     <!-- Hasil Tes -->
-    <div id="result-screen" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-6 bg-white">
-        <div class="text-center max-w-md w-full">
-            <div class="relative inline-block mb-10">
-                <div class="absolute inset-0 bg-indigo-200 rounded-full blur-3xl opacity-30"></div>
-                <div class="relative w-36 h-36 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto border-4 border-white shadow-2xl">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
-            </div>
+    <div id="result-screen" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-6 bg-[#0f172a]">
+        <div class="text-center w-full max-w-sm">
+            <h2 class="text-3xl font-bold mb-2">Waktu Habis!</h2>
+            <p class="text-slate-400 mb-10">Hasil produktivitas kerja Anda:</p>
             
-            <h2 class="text-4xl font-black text-slate-900 mb-2 tracking-tight">Selesai!</h2>
-            <p class="text-slate-500 font-medium mb-12">Data produktivitas telah terekam.</p>
-            
-            <div class="bg-indigo-600 p-14 rounded-[4rem] shadow-2xl shadow-indigo-200 mb-12">
-                <p class="text-indigo-100 text-xs font-bold uppercase tracking-[0.3em] mb-4">Skor Produktivitas</p>
-                <h3 id="final-score" class="text-9xl font-black text-white leading-none">0</h3>
+            <div class="bg-blue-600 py-12 rounded-[3rem] shadow-2xl shadow-blue-900/40 mb-10">
+                <p class="text-blue-100 text-xs font-bold uppercase tracking-widest mb-2">Total Benar</p>
+                <h3 id="final-score" class="text-8xl font-black text-white">0</h3>
             </div>
 
             <div class="flex flex-col gap-4">
-                <button onclick="window.location.reload()" class="w-full py-5 bg-slate-900 text-white rounded-[2rem] font-bold text-lg hover:bg-slate-800 transition shadow-lg">Ulangi Tes</button>
-                <a href="index.html" class="text-slate-400 font-bold text-sm hover:text-indigo-600 transition tracking-widest uppercase">Beranda Tilik Psikologi</a>
+                <button onclick="location.reload()" class="w-full py-4 bg-slate-800 text-white rounded-2xl font-bold">Ulangi Tes</button>
+                <a href="index.html" class="text-slate-500 font-bold text-sm uppercase tracking-widest py-2">Beranda</a>
             </div>
         </div>
     </div>
@@ -182,95 +118,76 @@
         const db = getFirestore(app);
 
         let numbers = [];
-        let currentIndex = 0;
+        let index = 0;
         let score = 0;
         let timeLeft = 15;
-        let timer;
         let isFinished = false;
-
-        const instructionScreen = document.getElementById('instruction-screen');
-        const testScreen = document.getElementById('test-screen');
-        const resultScreen = document.getElementById('result-screen');
-        const numberColumn = document.getElementById('number-column');
-        const ansInput = document.getElementById('ans-input');
-        const btnStart = document.getElementById('btn-start');
+        let timer;
 
         function generateNumbers() {
-            numberColumn.innerHTML = "";
-            numbers = Array.from({length: 300}, () => Math.floor(Math.random() * 9) + 1);
-            numbers.forEach((n, i) => {
-                const div = document.createElement('div');
-                div.className = "number-item";
-                div.id = `num-${i}`;
-                div.innerText = n;
-                numberColumn.appendChild(div);
-            });
-            updatePosition();
+            numbers = Array.from({length: 200}, () => Math.floor(Math.random() * 9) + 1);
+            updateDisplay();
         }
 
-        function updatePosition() {
-            const items = document.querySelectorAll('.number-item');
-            items.forEach(el => el.classList.remove('active-pair'));
-            
-            const current = document.getElementById(`num-${currentIndex}`);
-            const next = document.getElementById(`num-${currentIndex+1}`);
-            
-            if (current && next) {
-                current.classList.add('active-pair');
-                next.classList.add('active-pair');
+        function updateDisplay() {
+            const numTop = document.getElementById('num-top');
+            const numBottom = document.getElementById('num-bottom');
+            const numNext = document.getElementById('num-next');
+
+            numTop.innerText = numbers[index];
+            numBottom.innerText = numbers[index + 1];
+            numNext.innerText = numbers[index + 2] || "?";
+        }
+
+        window.handleInput = (val) => {
+            if (isFinished) return;
+
+            const correct = (numbers[index] + numbers[index + 1]) % 10;
+            if (val === correct) {
+                score++;
+                document.getElementById('live-score').innerText = score;
             }
             
-            // Kalkulasi presisi: Titik tengah container adalah 275px (h-550 / 2)
-            // Midpoint pasangan (item i & i+1) adalah (i * 120) + 120
-            // Jadi offset = 275 - ((currentIndex * 120) + 120)
-            const offset = 155 - (currentIndex * 120);
-            numberColumn.style.transform = `translateY(${offset}px)`; 
-        }
+            index++;
+            updateDisplay();
+        };
 
-        function startTest() {
-            instructionScreen.style.display = 'none';
-            testScreen.classList.remove('hidden');
-            generateNumbers();
+        // Dukungan Keyboard
+        window.addEventListener('keydown', (e) => {
+            if (!isNaN(e.key)) handleInput(parseInt(e.key));
+        });
+
+        window.startTest = () => {
+            document.getElementById('instruction-screen').style.display = 'none';
+            document.getElementById('test-screen').classList.remove('hidden');
+            document.getElementById('test-header').style.opacity = '1';
             
-            setTimeout(() => ansInput.focus(), 400);
+            generateNumbers();
 
             timer = setInterval(() => {
                 timeLeft--;
                 document.getElementById('timer').innerText = timeLeft;
-                if(timeLeft <= 0) finish();
+                if (timeLeft <= 0) finishTest();
             }, 1000);
-        }
+        };
 
-        ansInput.addEventListener('input', (e) => {
-            if(isFinished) return;
-            const val = parseInt(e.target.value);
-            const correct = (numbers[currentIndex] + numbers[currentIndex+1]) % 10;
-            
-            if(!isNaN(val)) {
-                if(val === correct) score++;
-                currentIndex++;
-                e.target.value = '';
-                updatePosition();
-            }
-        });
-
-        async function finish() {
-            if(isFinished) return;
+        async function finishTest() {
+            if (isFinished) return;
             isFinished = true;
             clearInterval(timer);
+
             const nama = localStorage.getItem("nama_peserta") || "Peserta";
             try {
-                await addDoc(collection(db, "hasil_tes"), { 
-                    nama, tes: "Kraepelin", skor: score, waktu: new Date().toLocaleString('id-ID') 
+                await addDoc(collection(db, "hasil_tes"), {
+                    nama, tes: "Kraepelin", skor: score, waktu: new Date().toLocaleString('id-ID')
                 });
             } catch (err) { console.error(err); }
 
-            testScreen.classList.add('hidden');
-            resultScreen.classList.remove('hidden');
+            document.getElementById('test-screen').classList.add('hidden');
+            document.getElementById('test-header').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
             document.getElementById('final-score').innerText = score;
         }
-
-        btnStart.addEventListener('click', startTest);
     </script>
 </body>
 </html>
