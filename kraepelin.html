@@ -1,11 +1,43 @@
-<div id="test-content" class="hidden min-h-screen flex flex-col items-center justify-center">
-    <div class="bg-white p-10 rounded-3xl shadow-xl text-center">
-        <div class="flex gap-4 justify-center text-4xl font-bold mb-6">
-            <span id="num1">7</span>
-            <span>+</span>
-            <span id="num2">5</span>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Tes Kraepelin | Tilik Psikologi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>body { font-family: 'Poppins', sans-serif; overflow: hidden; }</style>
+</head>
+<body class="bg-slate-900 text-white flex items-center justify-center min-h-screen">
+
+    <div id="test-box" class="text-center p-12 bg-slate-800 rounded-3xl border-2 border-slate-700 shadow-2xl max-w-xs w-full">
+        <div class="mb-2 text-blue-400 text-xs font-bold tracking-widest uppercase">Hitung Cepat</div>
+        <div class="flex items-center justify-center gap-6 text-6xl font-black mb-8">
+            <span id="n1">7</span>
+            <span class="text-slate-600">+</span>
+            <span id="n2">5</span>
         </div>
-        <input type="number" id="ans" class="text-center border-b-4 border-blue-600 text-3xl w-24 outline-none" autofocus>
-        <p class="text-xs text-slate-400 mt-4">Ketik angka terakhir saja (Contoh: 7+5=12, ketik 2)</p>
+        
+        <input type="number" id="user-ans" class="w-full bg-slate-900 border-2 border-blue-500 rounded-2xl py-4 text-center text-4xl font-bold outline-none focus:ring-4 focus:ring-blue-500/20 transition-all" placeholder="?" autofocus>
+        
+        <p class="mt-6 text-slate-500 text-[10px] leading-relaxed">
+            Ketik <strong>angka terakhir</strong> dari hasil penjumlahan.<br>
+            Contoh: 7 + 5 = 12, ketik <strong>2</strong>.
+        </p>
     </div>
-</div>
+
+    <script>
+        const n1 = document.getElementById('n1');
+        const n2 = document.getElementById('n2');
+        const input = document.getElementById('user-ans');
+
+        input.addEventListener('input', (e) => {
+            if (e.target.value.length >= 1) {
+                // Logika ganti soal otomatis setelah input
+                n1.innerText = Math.floor(Math.random() * 9) + 1;
+                n2.innerText = Math.floor(Math.random() * 9) + 1;
+                e.target.value = '';
+            }
+        });
+    </script>
+</body>
+</html>
