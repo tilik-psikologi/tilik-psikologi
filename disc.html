@@ -1,37 +1,62 @@
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-    // ... (firebaseConfig tetap sama seperti di atas)
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    // Tempelkan fungsi ke window
-    window.kirimDISC = async () => {
-        let scores = { D:0, I:0, S:0, C:0 };
-        // Ambil data dari 2 nomor contoh
-        for(let i=0; i<2; i++) {
-            const m = document.querySelector(`input[name="m${i}"]:checked`)?.value;
-            const l = document.querySelector(`input[name="l${i}"]:checked`)?.value;
-            if(m) scores[m]++;
-            if(l) scores[l]--;
-        }
-
-        const user = JSON.parse(localStorage.getItem('pesertaAktif')) || {nama: "Anonim"};
-        const skorFinal = `D:${scores.D}, I:${scores.I}, S:${scores.S}, C:${scores.C}`;
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Tes DISC | Tilik Psikologi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 p-5">
+    <div class="max-w-2xl mx-auto bg-white p-8 rounded-2xl shadow-md">
+        <h1 class="text-2xl font-bold text-blue-900 mb-2">Tes Kepribadian DISC</h1>
+        <p class="text-sm text-slate-500 mb-6">Pilihlah satu pernyataan yang paling menggambarkan diri Anda.</p>
         
-        try {
-            await addDoc(collection(db, "hasil_tes"), {
-                nama: user.nama, 
-                tes: "DISC", 
-                skor: skorFinal, 
-                waktu: new Date().toLocaleString()
-            });
-            alert("Hasil DISC terkirim!"); 
-            window.location.href = "pilih-tes.html";
-        } catch (e) {
-            alert("Gagal mengirim data DISC.");
-        }
-    };
-</script>
+        <div id="quiz-container">
+            <div class="mb-6 p-4 border rounded-xl">
+                <p class="font-bold mb-3">1. Dalam bekerja, saya adalah orang yang...</p>
+                <label class="block p-2"><input type="radio" name="q1" value="D"> Dominan & Cepat</label>
+                <label class="block p-2"><input type="radio" name="q1" value="I"> Antusias & Ramah</label>
+                <label class="block p-2"><input type="radio" name="q1" value="S"> Sabar & Pendengar</label>
+                <label class="block p-2"><input type="radio" name="q1" value="C"> Teliti & Akurat</label>
+            </div>
+            <button onclick="simpanHasil()" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold">Kirim Hasil</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // KREDENSI FIREBASE RAFAEL
+        const firebaseConfig = {
+            apiKey: "AIzaSyBZsXx_T5-5bKp14BLhuZGNfj4Ils71nVA",
+            authDomain: "tilikpsikologi-cbt.firebaseapp.com",
+            projectId: "tilikpsikologi-cbt",
+            storageBucket: "tilikpsikologi-cbt.firebasestorage.app",
+            messagingSenderId: "940142802410",
+            appId: "1:940142802410:web:5e6579568ed2774d9a2e93"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.simpanHasil = async () => {
+            const namaPeserta = localStorage.getItem("nama_peserta") || "Anonim";
+            const skorTest = "D:1, I:0, S:0, C:0"; // Logika perhitungan skor Anda di sini
+            
+            try {
+                await addDoc(collection(db, "hasil_tes"), {
+                    nama: namaPeserta,
+                    tes: "DISC",
+                    skor: skorTest,
+                    waktu: new Date().toLocaleString("id-ID")
+                });
+                alert("Hasil tes berhasil disimpan!");
+                window.location.href = "index.html";
+            } catch (e) {
+                console.error("Error: ", e);
+                alert("Gagal menyimpan hasil.");
+            }
+        };
+    </script>
+</body>
+</html>
