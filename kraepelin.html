@@ -8,9 +8,29 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: 'Poppins', sans-serif; user-select: none; }
-        .number-item { font-size: 1.8rem; font-weight: 800; color: #cbd5e1; transition: all 0.3s; }
-        .active-pair { color: #2563eb; transform: scale(1.2); opacity: 1; }
-        .bg-pattern { background-color: #f8fafc; background-image: radial-gradient(#e2e8f0 0.5px, transparent 0.5px); background-size: 20px 20px; }
+        .number-item { 
+            font-size: 2rem; 
+            font-weight: 800; 
+            color: #cbd5e1; 
+            transition: all 0.3s ease;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .active-pair { 
+            color: #2563eb; 
+            transform: scale(1.3); 
+            opacity: 1; 
+        }
+        .bg-pattern { 
+            background-color: #f8fafc; 
+            background-image: radial-gradient(#e2e8f0 0.5px, transparent 0.5px); 
+            background-size: 20px 20px; 
+        }
+        #number-column {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
     </style>
 </head>
 <body class="bg-pattern text-slate-900 overflow-hidden">
@@ -18,44 +38,64 @@
     <!-- Instruksi -->
     <div id="instruction-screen" class="min-h-screen flex items-center justify-center p-6 z-50 relative bg-white">
         <div class="max-w-md w-full text-center">
-            <div class="w-20 h-20 bg-blue-100 text-blue-600 rounded-3xl flex items-center justify-center mx-auto mb-6 text-2xl font-bold">1+1</div>
+            <div class="w-20 h-20 bg-blue-100 text-blue-600 rounded-3xl flex items-center justify-center mx-auto mb-6 text-2xl font-bold shadow-sm">1+1</div>
             <h2 class="text-2xl font-bold text-blue-900 mb-4">Instruksi Kraepelin</h2>
             <div class="text-slate-500 text-sm space-y-4 mb-8 text-left leading-relaxed">
-                <p>1. Jumlahkan dua angka yang menyala biru.</p>
-                <p>2. Ketik <strong>Angka Terakhir</strong> saja. <br><span class="italic text-xs text-blue-500">Contoh: 8 + 7 = 15, ketik 5.</span></p>
+                <p>1. Jumlahkan dua angka yang menyala biru (dari bawah ke atas).</p>
+                <p>2. Ketik <strong>Angka Terakhir</strong> saja dari hasil penjumlahan. <br><span class="italic text-xs text-blue-500 font-semibold">Contoh: 8 + 7 = 15, maka Anda cukup mengetik 5.</span></p>
                 <p>3. Waktu Anda adalah <strong>15 Detik</strong>. Kerjakan secepat mungkin!</p>
             </div>
-            <button onclick="startTest()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all">Mulai Tes</button>
+            <button id="btn-start" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all">Mulai Tes Sekarang</button>
         </div>
     </div>
 
     <!-- Konten Tes -->
     <div id="test-screen" class="hidden min-h-screen flex flex-col items-center justify-center relative">
-        <div class="fixed top-10 flex flex-col items-center bg-white/80 backdrop-blur px-6 py-2 rounded-2xl border">
+        <!-- Timer -->
+        <div class="fixed top-10 flex flex-col items-center bg-white/90 backdrop-blur-md px-8 py-3 rounded-3xl border border-blue-50 shadow-sm z-10">
             <div id="timer" class="text-4xl font-black text-red-600">15</div>
             <div class="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Detik Tersisa</div>
         </div>
 
-        <div class="flex flex-col items-center mt-20">
-            <div id="number-column" class="flex flex-col-reverse gap-8 items-center transition-all duration-300">
-                <!-- Angka di-generate JS -->
+        <!-- Kolom Angka (Model Tes Koran) -->
+        <div class="relative h-[300px] w-full flex items-center justify-center overflow-hidden">
+            <div id="number-column" class="flex flex-col-reverse items-center">
+                <!-- Angka akan di-generate oleh JavaScript -->
+            </div>
+            <!-- Garis Penanda Fokus -->
+            <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
+                <div class="w-32 h-[130px] border-y-2 border-blue-200/50 bg-blue-50/10"></div>
             </div>
         </div>
 
-        <div class="fixed bottom-10">
-            <input type="number" id="ans-input" class="w-24 bg-white border-b-4 border-blue-600 text-center text-5xl font-bold py-2 outline-none" placeholder="?" autofocus>
+        <!-- Input Area -->
+        <div class="fixed bottom-10 flex flex-col items-center gap-2">
+            <input type="number" id="ans-input" 
+                class="w-24 bg-white border-b-4 border-blue-600 text-center text-5xl font-bold py-2 outline-none shadow-sm rounded-t-lg" 
+                placeholder="?" 
+                inputmode="numeric"
+                autocomplete="off">
+            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Ketik Jawaban Anda</p>
         </div>
     </div>
 
     <!-- Hasil -->
-    <div id="result-screen" class="hidden min-h-screen flex items-center justify-center p-6">
-        <div class="bg-white p-10 rounded-[2.5rem] shadow-2xl border text-center max-w-sm w-full">
-            <h2 class="text-xl font-bold text-blue-900 mb-6">Hasil Tes</h2>
+    <div id="result-screen" class="hidden min-h-screen flex items-center justify-center p-6 bg-white z-[60]">
+        <div class="bg-white p-10 rounded-[2.5rem] shadow-2xl border border-slate-50 text-center max-w-sm w-full">
+            <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                </svg>
+            </div>
+            <h2 class="text-xl font-bold text-blue-900 mb-6">Tes Selesai</h2>
             <div class="bg-blue-50 p-8 rounded-3xl mb-8">
-                <p class="text-xs font-bold text-blue-600 uppercase mb-2">Skor Benar</p>
+                <p class="text-xs font-bold text-blue-600 uppercase mb-2">Jumlah Benar</p>
                 <h3 id="final-score" class="text-6xl font-black text-blue-900">0</h3>
             </div>
-            <a href="index.html" class="block w-full text-slate-400 hover:text-blue-600 underline text-sm">Kembali ke Beranda</a>
+            <div class="space-y-3">
+                <button onclick="window.location.reload()" class="w-full bg-slate-100 text-slate-600 py-3 rounded-xl font-bold text-sm hover:bg-slate-200 transition">Coba Lagi</button>
+                <a href="index.html" class="block w-full text-blue-600 font-bold text-sm hover:underline py-2">Kembali ke Beranda</a>
+            </div>
         </div>
     </div>
 
@@ -63,7 +103,15 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        const firebaseConfig = { apiKey: "AIzaSyBZsXx_T5-5bKp14BLhuZGNfj4Ils71nVA", authDomain: "tilikpsikologi-cbt.firebaseapp.com", projectId: "tilikpsikologi-cbt", storageBucket: "tilikpsikologi-cbt.firebasestorage.app", messagingSenderId: "940142802410", appId: "1:940142802410:web:5e6579568ed2774d9a2e93" };
+        const firebaseConfig = { 
+            apiKey: "AIzaSyBZsXx_T5-5bKp14BLhuZGNfj4Ils71nVA", 
+            authDomain: "tilikpsikologi-cbt.firebaseapp.com", 
+            projectId: "tilikpsikologi-cbt", 
+            storageBucket: "tilikpsikologi-cbt.firebasestorage.app", 
+            messagingSenderId: "940142802410", 
+            appId: "1:940142802410:web:5e6579568ed2774d9a2e93" 
+        };
+
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
@@ -72,44 +120,75 @@
         let score = 0;
         let timeLeft = 15;
         let timer;
+        let isFinished = false;
+
+        const instructionScreen = document.getElementById('instruction-screen');
+        const testScreen = document.getElementById('test-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const numberColumn = document.getElementById('number-column');
+        const ansInput = document.getElementById('ans-input');
+        const btnStart = document.getElementById('btn-start');
 
         function generateNumbers() {
-            const col = document.getElementById('number-column');
-            numbers = Array.from({length: 100}, () => Math.floor(Math.random() * 9) + 1);
+            numberColumn.innerHTML = "";
+            // Menghasilkan 200 angka acak agar tidak habis
+            numbers = Array.from({length: 200}, () => Math.floor(Math.random() * 9) + 1);
             numbers.forEach((n, i) => {
                 const div = document.createElement('div');
                 div.className = "number-item";
                 div.id = `num-${i}`;
                 div.innerText = n;
-                col.appendChild(div);
+                numberColumn.appendChild(div);
             });
             updateUI();
         }
 
         function updateUI() {
-            document.querySelectorAll('.number-item').forEach(el => el.classList.remove('active-pair'));
-            document.getElementById(`num-${currentIndex}`).classList.add('active-pair');
-            document.getElementById(`num-${currentIndex+1}`).classList.add('active-pair');
-            document.getElementById('number-column').style.transform = `translateY(${currentIndex * 68}px)`;
+            // Reset highlight
+            const items = document.querySelectorAll('.number-item');
+            items.forEach(el => el.classList.remove('active-pair'));
+            
+            // Highlight pasangan aktif
+            const current = document.getElementById(`num-${currentIndex}`);
+            const next = document.getElementById(`num-${currentIndex+1}`);
+            
+            if (current && next) {
+                current.classList.add('active-pair');
+                next.classList.add('active-pair');
+            }
+            
+            // Geser kolom (offset 60px per angka)
+            // Menggunakan transform untuk performa halus
+            const offset = currentIndex * 60;
+            numberColumn.style.transform = `translateY(${offset}px)`;
         }
 
-        window.startTest = () => {
-            document.getElementById('instruction-screen').classList.add('hidden');
-            document.getElementById('test-screen').classList.remove('hidden');
-            document.getElementById('ans-input').focus();
+        function startTest() {
+            instructionScreen.classList.add('hidden');
+            testScreen.classList.remove('hidden');
             generateNumbers();
+            
+            // Gunakan sedikit delay agar focus bekerja pada mobile
+            setTimeout(() => ansInput.focus(), 100);
+
             timer = setInterval(() => {
                 timeLeft--;
                 document.getElementById('timer').innerText = timeLeft;
                 if(timeLeft <= 0) finish();
             }, 1000);
-        };
+        }
 
-        document.getElementById('ans-input').addEventListener('input', (e) => {
+        ansInput.addEventListener('input', (e) => {
+            if(isFinished) return;
+
             const val = parseInt(e.target.value);
+            // Ambil angka terakhir saja (modulo 10)
             const correct = (numbers[currentIndex] + numbers[currentIndex+1]) % 10;
+            
             if(!isNaN(val)) {
-                if(val === correct) score++;
+                if(val === correct) {
+                    score++;
+                }
                 currentIndex++;
                 e.target.value = '';
                 updateUI();
@@ -117,13 +196,31 @@
         });
 
         async function finish() {
+            if(isFinished) return;
+            isFinished = true;
             clearInterval(timer);
-            const nama = localStorage.getItem("nama_peserta") || "Peserta";
-            await addDoc(collection(db, "hasil_tes"), { nama, tes: "Kraepelin", skor: score, waktu: new Date().toLocaleString() });
-            document.getElementById('test-screen').classList.add('hidden');
-            document.getElementById('result-screen').classList.remove('hidden');
+            
+            const nama = localStorage.getItem("nama_peserta") || "Peserta Anonim";
+            
+            try {
+                // Simpan ke Firebase
+                await addDoc(collection(db, "hasil_tes"), { 
+                    nama: nama, 
+                    tes: "Kraepelin", 
+                    skor: score, 
+                    waktu: new Date().toLocaleString('id-ID') 
+                });
+            } catch (err) {
+                console.error("Firebase Error:", err);
+            }
+
+            testScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
             document.getElementById('final-score').innerText = score;
         }
+
+        // Event Listeners
+        btnStart.addEventListener('click', startTest);
     </script>
 </body>
 </html>
