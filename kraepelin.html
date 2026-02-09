@@ -11,11 +11,11 @@
         
         /* Gaya Item Angka - Ukuran diperbesar (Zoomed In Look) */
         .number-item { 
-            font-size: 4rem; /* Diperbesar dari 2.75rem */
+            font-size: 4rem; 
             font-weight: 900; 
             color: #e2e8f0; 
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            height: 120px; /* Diperbesar dari 90px */
+            height: 120px; 
             display: flex;
             align-items: center;
             justify-content: center;
@@ -49,10 +49,10 @@
             border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
-        /* Scanning Line */
+        /* Scanning Line - Lebih halus agar tidak mengganggu pandangan */
         .scan-line {
-            height: 3px;
-            background: linear-gradient(90deg, transparent, rgba(30, 64, 175, 0.3), transparent);
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(30, 64, 175, 0.1), transparent);
             width: 100%;
             position: absolute;
             top: 50%;
@@ -104,16 +104,22 @@
             </div>
         </div>
 
-        <!-- Kolom Tes (Zoomed Version) -->
-        <div class="relative h-[550px] w-full max-w-md flex items-center justify-center overflow-hidden rounded-[4rem]">
+        <!-- Kolom Tes (Container Utama) -->
+        <div class="relative h-[550px] w-full max-w-md flex items-center justify-center overflow-hidden">
             <div id="number-column" class="flex flex-col items-center">
                 <!-- Angka di-generate via JS -->
             </div>
             
-            <!-- Focus Guide (Disesuaikan dengan tinggi baru) -->
+            <!-- Focus Guide (Kotak Penanda yang Diperbaiki) -->
             <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
-                <div class="w-full h-[240px] border-y-2 border-indigo-100 bg-indigo-50/20 backdrop-blur-[1px]"></div>
-                <div class="scan-line"></div>
+                <!-- Kotak Luar -->
+                <div class="w-[85%] h-[260px] border-2 border-indigo-600/10 bg-indigo-50/5 rounded-[3rem] shadow-inner relative">
+                    <!-- Garis Penjepit (Bracket) agar lebih jelas -->
+                    <div class="absolute top-4 bottom-4 left-4 w-1 border-y-2 border-l-2 border-indigo-400/40 rounded-l-lg"></div>
+                    <div class="absolute top-4 bottom-4 right-4 w-1 border-y-2 border-r-2 border-indigo-400/40 rounded-r-lg"></div>
+                </div>
+                <!-- Garis Tengah (Opsional, untuk memisahkan dua angka secara visual) -->
+                <div class="absolute w-[70%] h-[1px] bg-indigo-100/30"></div>
             </div>
         </div>
 
@@ -214,9 +220,11 @@
                 next.classList.add('active-pair');
             }
             
-            // Offset disesuaikan dengan tinggi item 120px
-            const offset = -(currentIndex * 120);
-            numberColumn.style.transform = `translateY(${offset + 60}px)`; 
+            // Kalkulasi presisi: Titik tengah container adalah 275px (h-550 / 2)
+            // Midpoint pasangan (item i & i+1) adalah (i * 120) + 120
+            // Jadi offset = 275 - ((currentIndex * 120) + 120)
+            const offset = 155 - (currentIndex * 120);
+            numberColumn.style.transform = `translateY(${offset}px)`; 
         }
 
         function startTest() {
