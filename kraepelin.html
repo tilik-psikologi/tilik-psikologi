@@ -2,42 +2,135 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tes Kraepelin | Tilik Psikologi</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>body { font-family: 'Poppins', sans-serif; overflow: hidden; }</style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body { font-family: 'Poppins', sans-serif; user-select: none; }
+        .number-col { writing-mode: vertical-rl; text-orientation: upright; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    </style>
 </head>
-<body class="bg-slate-900 text-white flex items-center justify-center min-h-screen">
+<body class="bg-slate-900 text-white overflow-hidden">
 
-    <div id="test-box" class="text-center p-12 bg-slate-800 rounded-3xl border-2 border-slate-700 shadow-2xl max-w-xs w-full">
-        <div class="mb-2 text-blue-400 text-xs font-bold tracking-widest uppercase">Hitung Cepat</div>
-        <div class="flex items-center justify-center gap-6 text-6xl font-black mb-8">
-            <span id="n1">7</span>
-            <span class="text-slate-600">+</span>
-            <span id="n2">5</span>
+    <div id="start-screen" class="min-h-screen flex items-center justify-center p-6 text-center">
+        <div class="bg-white text-slate-900 max-w-md p-8 rounded-3xl shadow-2xl">
+            <h2 class="text-2xl font-bold text-blue-900 mb-4">Instruksi Tes Kraepelin</h2>
+            <p class="text-sm text-slate-600 mb-6 text-left">Jumlahkan dua angka yang muncul secara vertikal. Ketik <strong>angka terakhir</strong> dari hasil penjumlahannya saja.<br><br>Contoh: <b>7 + 5 = 12</b>, maka ketik <b>2</b>.</p>
+            <button onclick="startKraepelin()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold hover:bg-blue-700 transition">Mulai Tes (Layar Penuh)</button>
         </div>
-        
-        <input type="number" id="user-ans" class="w-full bg-slate-900 border-2 border-blue-500 rounded-2xl py-4 text-center text-4xl font-bold outline-none focus:ring-4 focus:ring-blue-500/20 transition-all" placeholder="?" autofocus>
-        
-        <p class="mt-6 text-slate-500 text-[10px] leading-relaxed">
-            Ketik <strong>angka terakhir</strong> dari hasil penjumlahan.<br>
-            Contoh: 7 + 5 = 12, ketik <strong>2</strong>.
-        </p>
     </div>
 
-    <script>
-        const n1 = document.getElementById('n1');
-        const n2 = document.getElementById('n2');
-        const input = document.getElementById('user-ans');
+    <div id="test-content" class="hidden min-h-screen flex flex-col items-center justify-center">
+        <div class="absolute top-8 left-8">
+            <div id="timer" class="text-3xl font-black text-blue-400">01:00</div>
+            <div class="text-[10px] uppercase tracking-widest opacity-50">Sisa Waktu</div>
+        </div>
 
-        input.addEventListener('input', (e) => {
-            if (e.target.value.length >= 1) {
-                // Logika ganti soal otomatis setelah input
-                n1.innerText = Math.floor(Math.random() * 9) + 1;
-                n2.innerText = Math.floor(Math.random() * 9) + 1;
+        <div class="flex flex-col items-center bg-slate-800 p-10 rounded-3xl border-2 border-slate-700 shadow-2xl">
+            <div class="flex flex-col gap-2 mb-8 items-center">
+                <div id="num-top" class="text-6xl font-black text-slate-500 opacity-40">8</div>
+                <div id="num-bottom" class="text-8xl font-black text-white">4</div>
+            </div>
+
+            <input type="number" id="ans-input" class="w-24 bg-slate-900 border-b-4 border-blue-500 text-center text-5xl font-bold py-2 outline-none focus:border-blue-300 transition-all" placeholder="?" autofocus>
+            
+            <div class="mt-8 flex gap-2">
+                <div id="streak-count" class="bg-blue-900/50 px-4 py-1 rounded-full text-xs font-bold text-blue-300">Skor: 0</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="result-screen" class="hidden min-h-screen flex items-center justify-center p-6 text-center">
+        <div class="bg-white text-slate-900 max-w-md w-full p-8 rounded-3xl shadow-2xl">
+            <h2 class="text-2xl font-bold text-blue-900 mb-6">Hasil Tes Kerja</h2>
+            <div class="bg-blue-50 p-6 rounded-2xl mb-8">
+                <p class="text-xs text-blue-600 font-bold uppercase mb-2">Total Penjumlahan Benar</p>
+                <h3 id="final-skor" class="text-6xl font-black text-blue-900">0</h3>
+            </div>
+            <button onclick="downloadPDF()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold mb-4 shadow-lg">Unduh Hasil PDF</button>
+            <a href="index.html" class="text-sm text-slate-400 underline">Kembali ke Beranda</a>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // KREDENSI FIREBASE
+        const firebaseConfig = { apiKey: "AIzaSyBZsXx_T5-5bKp14BLhuZGNfj4Ils71nVA", authDomain: "tilikpsikologi-cbt.firebaseapp.com", projectId: "tilikpsikologi-cbt", storageBucket: "tilikpsikologi-cbt.firebasestorage.app", messagingSenderId: "940142802410", appId: "1:940142802410:web:5e6579568ed2774d9a2e93" };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let n1, n2, timerInterval;
+        let score = 0;
+        let timeLeft = 60;
+        const nama = localStorage.getItem("nama_peserta") || "Peserta";
+
+        function generateSoal() {
+            n1 = Math.floor(Math.random() * 9) + 1;
+            n2 = Math.floor(Math.random() * 9) + 1;
+            document.getElementById('num-top').innerText = n1;
+            document.getElementById('num-bottom').innerText = n2;
+        }
+
+        window.startKraepelin = () => {
+            if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('test-content').classList.remove('hidden');
+            generateSoal();
+            startTimer();
+        };
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                let mins = Math.floor(timeLeft / 60);
+                let secs = timeLeft % 60;
+                document.getElementById('timer').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                if (timeLeft <= 0) finishTest();
+            }, 1000);
+        }
+
+        document.getElementById('ans-input').addEventListener('input', (e) => {
+            const val = parseInt(e.target.value);
+            const correct = (n1 + n2) % 10;
+            if (!isNaN(val)) {
+                if (val === correct) {
+                    score++;
+                    document.getElementById('streak-count').innerText = `Skor: ${score}`;
+                }
                 e.target.value = '';
+                generateSoal();
             }
         });
+
+        async function finishTest() {
+            clearInterval(timerInterval);
+            const waktu = new Date().toLocaleString("id-ID");
+            await addDoc(collection(db, "hasil_tes"), { nama, tes: "Kraepelin", skor: score.toString(), waktu });
+            
+            if (document.fullscreenElement) document.exitFullscreen();
+            document.getElementById('test-content').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            document.getElementById('final-skor').innerText = score;
+        }
+
+        window.downloadPDF = () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.setFont("helvetica", "bold");
+            doc.text("LAPORAN TES KRAEPELIN DIGITAL", 105, 20, { align: "center" });
+            doc.line(20, 25, 190, 25);
+            doc.setFont("helvetica", "normal");
+            doc.text(`Nama Peserta : ${nama}`, 20, 40);
+            doc.text(`Alat Tes     : Kraepelin (Speed Test)`, 20, 50);
+            doc.text(`Skor (Benar) : ${score} baris`, 20, 60);
+            doc.text(`Kategori     : ${score > 30 ? 'Sangat Baik' : 'Cukup'}`, 20, 70);
+            doc.save(`Kraepelin_${nama}.pdf`);
+        };
     </script>
 </body>
 </html>
