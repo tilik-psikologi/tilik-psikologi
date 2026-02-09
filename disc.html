@@ -59,8 +59,8 @@
     </div>
 
     <!-- Layar Hasil -->
-    <div id="result-screen" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-6 bg-slate-950">
-        <div class="text-center w-full max-w-md animate-in zoom-in duration-500">
+    <div id="result-screen" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-6 bg-slate-950 overflow-y-auto">
+        <div class="text-center w-full max-w-xl py-10 animate-in zoom-in duration-500">
             <div class="w-20 h-20 bg-blue-600 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-xl shadow-blue-900/20">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -70,23 +70,34 @@
             <h2 class="text-3xl font-black text-white mb-2 tracking-tight">Analisis Selesai</h2>
             <p class="text-slate-400 mb-10 text-sm">Berikut adalah profil kepribadian Anda:</p>
             
-            <div class="grid grid-cols-2 gap-4 mb-10">
-                <div class="bg-slate-900/50 border border-slate-800 p-6 rounded-3xl">
-                    <p class="text-[10px] font-bold text-red-500 uppercase tracking-widest mb-1">Dominance</p>
-                    <h3 id="score-D" class="text-4xl font-black text-white">0</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <div class="bg-slate-900/50 border border-slate-800 p-4 rounded-3xl">
+                    <p class="text-[10px] font-bold text-red-500 uppercase tracking-widest mb-1">D</p>
+                    <h3 id="score-D" class="text-3xl font-black text-white">0</h3>
                 </div>
-                <div class="bg-slate-900/50 border border-slate-800 p-6 rounded-3xl">
-                    <p class="text-[10px] font-bold text-yellow-500 uppercase tracking-widest mb-1">Influence</p>
-                    <h3 id="score-I" class="text-4xl font-black text-white">0</h3>
+                <div class="bg-slate-900/50 border border-slate-800 p-4 rounded-3xl">
+                    <p class="text-[10px] font-bold text-yellow-500 uppercase tracking-widest mb-1">I</p>
+                    <h3 id="score-I" class="text-3xl font-black text-white">0</h3>
                 </div>
-                <div class="bg-slate-900/50 border border-slate-800 p-6 rounded-3xl">
-                    <p class="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mb-1">Steadiness</p>
-                    <h3 id="score-S" class="text-4xl font-black text-white">0</h3>
+                <div class="bg-slate-900/50 border border-slate-800 p-4 rounded-3xl">
+                    <p class="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mb-1">S</p>
+                    <h3 id="score-S" class="text-3xl font-black text-white">0</h3>
                 </div>
-                <div class="bg-slate-900/50 border border-slate-800 p-6 rounded-3xl">
-                    <p class="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-1">Compliance</p>
-                    <h3 id="score-C" class="text-4xl font-black text-white">0</h3>
+                <div class="bg-slate-900/50 border border-slate-800 p-4 rounded-3xl">
+                    <p class="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-1">C</p>
+                    <h3 id="score-C" class="text-3xl font-black text-white">0</h3>
                 </div>
+            </div>
+
+            <!-- Bagian Kesimpulan Baru -->
+            <div class="bg-blue-900/20 border border-blue-800/50 p-6 rounded-[2rem] text-left mb-10">
+                <h4 class="text-blue-400 font-bold text-xs uppercase tracking-widest mb-3 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Interpretasi Hasil
+                </h4>
+                <p id="conclusion-text" class="text-slate-200 text-sm leading-relaxed">Menganalisis data...</p>
             </div>
 
             <div class="flex flex-col gap-3">
@@ -117,14 +128,12 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Data Soal DISC (Contoh simulasi beberapa soal)
         const questions = [
             { options: [{t:"Tegas, berani mengambil risiko", c:"D"}, {t:"Suka meyakinkan orang lain", c:"I"}, {t:"Suka membantu & kooperatif", c:"S"}, {t:"Suka dengan data & ketelitian", c:"C"}] },
             { options: [{t:"Berorientasi pada hasil akhir", c:"D"}, {t:"Optimis & penuh semangat", c:"I"}, {t:"Pendengar yang baik", c:"S"}, {t:"Sistematis & terencana", c:"C"}] },
             { options: [{t:"Langsung pada intinya", c:"D"}, {t:"Suka menjadi pusat perhatian", c:"I"}, {t:"Menghindari konflik", c:"S"}, {t:"Berpikir sebelum bertindak", c:"C"}] },
             { options: [{t:"Kompetitif", c:"D"}, {t:"Populer", c:"I"}, {t:"Sabar", c:"S"}, {t:"Sempurna", c:"C"}] },
             { options: [{t:"Pembuat keputusan", c:"D"}, {t:"Pemberi inspirasi", c:"I"}, {t:"Penyelesai masalah", c:"S"}, {t:"Penganalisa", c:"C"}] }
-            // Soal bisa dilanjutkan hingga 24 nomor
         ];
 
         let currentQ = 0;
@@ -157,15 +166,30 @@
             });
         }
 
+        function getConclusion() {
+            const maxScore = Math.max(scores.D, scores.I, scores.S, scores.C);
+            const primaries = Object.keys(scores).filter(key => scores[key] === maxScore);
+            const primary = primaries[0];
+
+            const interpretations = {
+                D: "Berdasarkan hasil asesmen, Anda memiliki profil 'Dominance' yang menonjol. Anda adalah pribadi yang sangat berorientasi pada hasil, tegas, dan menyukai tantangan. Anda cenderung memecahkan masalah dengan cepat dan berani mengambil risiko untuk mencapai tujuan.",
+                I: "Berdasarkan hasil asesmen, Anda memiliki profil 'Influence' yang menonjol. Anda adalah pribadi yang antusias, komunikatif, dan persuasif. Anda sangat pandai membangun jaringan sosial, memotivasi orang lain, dan menyukai lingkungan kerja yang penuh interaksi.",
+                S: "Berdasarkan hasil asesmen, Anda memiliki profil 'Steadiness' yang menonjol. Anda adalah pribadi yang sabar, setia, dan pendengar yang baik. Anda cenderung menyukai harmoni dalam lingkungan kerja, dapat diandalkan dalam tim, dan sangat menghargai stabilitas.",
+                C: "Berdasarkan hasil asesmen, Anda memiliki profil 'Compliance' yang menonjol. Anda adalah pribadi yang teliti, logis, dan sangat memperhatikan detail. Anda bekerja secara sistematis, menjunjung tinggi standar kualitas, dan lebih memilih keputusan berbasis data."
+            };
+
+            return interpretations[primary] || "Profil Anda menunjukkan keseimbangan di beberapa dimensi perilaku.";
+        }
+
         async function finishTest() {
             if (isFinished) return;
             isFinished = true;
 
             const nama = localStorage.getItem("nama_peserta") || "Peserta Anonim";
             const resultString = `D:${scores.D}, I:${scores.I}, S:${scores.S}, C:${scores.C}`;
+            const conclusion = getConclusion();
             
             try {
-                // Simpan ke Firebase
                 await addDoc(collection(db, "hasil_tes"), {
                     nama: nama,
                     tes: "DISC",
@@ -184,6 +208,7 @@
             document.getElementById('score-I').innerText = scores.I;
             document.getElementById('score-S').innerText = scores.S;
             document.getElementById('score-C').innerText = scores.C;
+            document.getElementById('conclusion-text').innerText = conclusion;
         }
 
         window.downloadPDF = () => {
@@ -191,8 +216,8 @@
             const doc = new jsPDF();
             const nama = localStorage.getItem("nama_peserta") || "Peserta";
             const tanggal = new Date().toLocaleString('id-ID');
+            const conclusion = getConclusion();
 
-            // Desain PDF
             doc.setFont("helvetica", "bold");
             doc.setFontSize(22);
             doc.setTextColor(30, 64, 175);
@@ -206,7 +231,6 @@
             doc.setDrawColor(30, 64, 175);
             doc.line(20, 45, 190, 45);
 
-            // Data Peserta
             doc.setFontSize(11);
             doc.setTextColor(0, 0, 0);
             doc.setFont("helvetica", "normal");
@@ -214,9 +238,8 @@
             doc.text(`Tanggal Asesmen : ${tanggal}`, 20, 68);
             doc.text(`Kategori Tes    : Simulasi DISC Personality`, 20, 76);
 
-            // Tabel Skor
             doc.setFillColor(248, 250, 252);
-            doc.rect(20, 90, 170, 50, 'F');
+            doc.rect(20, 90, 170, 45, 'F');
             doc.setFont("helvetica", "bold");
             doc.text("Ringkasan Skor:", 30, 100);
             
@@ -226,7 +249,12 @@
             doc.text(`Steadiness (S) : ${scores.S}`, 35, 126);
             doc.text(`Compliance (C) : ${scores.C}`, 35, 134);
 
-            // Footer Disclaimer (Sesuai Permintaan)
+            doc.setFont("helvetica", "bold");
+            doc.text("Interpretasi Hasil:", 20, 155);
+            doc.setFont("helvetica", "normal");
+            const splitConclusion = doc.splitTextToSize(conclusion, 170);
+            doc.text(splitConclusion, 20, 162);
+
             doc.setDrawColor(220, 220, 220);
             doc.line(20, 250, 190, 250);
             
