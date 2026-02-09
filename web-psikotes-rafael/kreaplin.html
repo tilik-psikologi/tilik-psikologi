@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Tes Kraepelin | TilikPsikologi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .active-col { background-color: #f0f9ff; border: 2px solid #3b82f6; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; }
+    </style>
+</head>
+<body class="bg-slate-900 text-white min-h-screen overflow-hidden">
+    <div class="p-4 border-b border-slate-700 flex justify-between">
+        <h2 class="font-bold">Kraepelin</h2>
+        <div id="timer" class="text-xl font-mono text-yellow-400">30</div>
+    </div>
+
+    <div id="grid-container" class="flex gap-4 p-10 overflow-x-auto h-[80vh] items-end">
+        </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBZsXx_T5-5bKp14BLhuZGNfj4Ils71nVA",
+            authDomain: "tilikpsikologi-cbt.firebaseapp.com",
+            projectId: "tilikpsikologi-cbt",
+            storageBucket: "tilikpsikologi-cbt.firebasestorage.app",
+            messagingSenderId: "940142802410",
+            appId: "1:940142802410:web:5e6579568ed2774d9a2e93"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let curCol = 0; let timeLeft = 30; let totalBenar = 0;
+
+        window.onload = () => {
+            const container = document.getElementById('grid-container');
+            for(let i=0; i<10; i++) {
+                const col = document.createElement('div');
+                col.id = `col-${i}`;
+                col.className = "flex flex-col-reverse gap-2 p-2 rounded-lg w-20 shrink-0 transition";
+                for(let j=0; j<20; j++) {
+                    const n = Math.floor(Math.random()*9)+1;
+                    const el = document.createElement('div');
+                    el.className = "text-center font-bold text-xl"; el.innerText = n;
+                    col.appendChild(el);
+                    if(j>0) {
+                        const inp = document.createElement('input');
+                        inp.type="number"; inp.dataset.col=i; inp.className="w-full bg-slate-700 text-center rounded focus:ring-2 focus:ring-blue-500 outline-none";
+                        inp.disabled = true;
+                        inp.oninput = (e) => { if(e.target.value.length > 1) e.target.value = e.target.value.slice(-1); e.target.nextElementSibling?.nextElementSibling?.focus(); };
+                        col.appendChild(inp);
+                    }
+                }
+                container.appendChild(col);
+            }
+            startKraepelin();
+        };
+
+        function startKraepelin() {
+            activateCol(0);
+            const timerInt = setInterval(() => {
+                timeLeft--; document.getElementById('timer').innerText = timeLeft;
+                if(timeLeft <= 0) {
+                    if(curCol < 9) { timeLeft = 30; activateCol(++curCol); }
+                    else { clearInterval(timerInt); finishKraepelin(); }
+                }
+            }, 1000);
+        }
+
+        function activateCol(idx) {
+            document.querySelectorAll('input').forEach(i => i.disabled = true);
+            const inputs = document.querySelectorAll(`input[data-col="${idx}"]`);
+            inputs.forEach(i => i.disabled = false);
+            inputs[0].focus();
+            document.getElementById(`col-${idx}`).classList.add('active-col');
+            document.getElementById(`col-${idx}`).scrollIntoView({ behavior: 'smooth', inline: 'center' });
+        }
+
+        async function finishKraepelin() {
+            const user = JSON.parse(localStorage.getItem('pesertaAktif'));
+            // Logika hitung skor sederhana (jumlah input terisi)
+            const terisi = document.querySelectorAll('input:not([value=""])').length;
+            await addDoc(collection(db, "hasil_tes"), {
+                nama: user.nama, tes: "Kraepelin", skor: `${terisi} angka`, waktu: new Date().toLocaleString()
+            });
+            alert("Tes Kraepelin Selesai!"); window.location.href = "pilih-tes.html";
+        }
+    </script>
+</body>
+</html>

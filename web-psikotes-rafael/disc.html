@@ -1,0 +1,37 @@
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // ... (firebaseConfig tetap sama seperti di atas)
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Tempelkan fungsi ke window
+    window.kirimDISC = async () => {
+        let scores = { D:0, I:0, S:0, C:0 };
+        // Ambil data dari 2 nomor contoh
+        for(let i=0; i<2; i++) {
+            const m = document.querySelector(`input[name="m${i}"]:checked`)?.value;
+            const l = document.querySelector(`input[name="l${i}"]:checked`)?.value;
+            if(m) scores[m]++;
+            if(l) scores[l]--;
+        }
+
+        const user = JSON.parse(localStorage.getItem('pesertaAktif')) || {nama: "Anonim"};
+        const skorFinal = `D:${scores.D}, I:${scores.I}, S:${scores.S}, C:${scores.C}`;
+        
+        try {
+            await addDoc(collection(db, "hasil_tes"), {
+                nama: user.nama, 
+                tes: "DISC", 
+                skor: skorFinal, 
+                waktu: new Date().toLocaleString()
+            });
+            alert("Hasil DISC terkirim!"); 
+            window.location.href = "pilih-tes.html";
+        } catch (e) {
+            alert("Gagal mengirim data DISC.");
+        }
+    };
+</script>

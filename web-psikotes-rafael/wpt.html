@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Tes WPT | TilikPsikologi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 p-6">
+    <div class="max-w-2xl mx-auto bg-white p-8 rounded-2xl shadow-lg border">
+        <div class="flex justify-between items-center mb-8 border-b pb-4 text-blue-900">
+            <h1 class="font-bold text-xl">Tes WPT (Kognitif)</h1>
+            <div id="timer" class="text-2xl font-mono text-red-600 font-bold">12:00</div>
+        </div>
+
+        <div id="soal-area">
+            <h2 id="teks-soal" class="text-xl font-medium mb-6">Memuat soal...</h2>
+            <div id="pilihan-jawaban" class="space-y-4">
+                </div>
+            
+            <div class="mt-10 pt-6 border-t flex justify-end">
+                <button id="btnNext" onclick="nextQuestion()" class="bg-blue-600 text-white px-10 py-3 rounded-xl font-bold hover:bg-blue-700 transition">
+                    Selanjutnya
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // CONFIG FIREBASE MILIK RAFAEL
+        const firebaseConfig = {
+            apiKey: "AIzaSyBZsXx_T5-5bKp14BLhuZGNfj4Ils71nVA",
+            authDomain: "tilikpsikologi-cbt.firebaseapp.com",
+            projectId: "tilikpsikologi-cbt",
+            storageBucket: "tilikpsikologi-cbt.firebasestorage.app",
+            messagingSenderId: "940142802410",
+            appId: "1:940142802410:web:5e6579568ed2774d9a2e93"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // DATA SOAL
+        const daftarSoal = [
+            { q: "Lawan kata dari 'Cepat' adalah?", a: ["Lari", "Lambat", "Gesit", "Tangkas"], c: 1 },
+            { q: "1, 3, 5, 7, ... angka selanjutnya adalah?", a: ["8", "9", "10", "11"], c: 1 },
+            { q: "Bulan ke-10 dalam setahun adalah?", a: ["Agustus", "September", "Oktober", "November"], c: 2 }
+        ];
+
+        let idx = 0; let skor = 0; let timeLeft = 720; let jawabanTerpilih = null;
+
+        // FUNGSI RENDER (Dibuat Global agar bisa diakses HTML)
+        window.tampilkanSoal = () => {
+            const s = daftarSoal[idx];
+            document.getElementById('teks-soal').innerText = `${idx + 1}. ${s.q}`;
+            const containerPilihan = document.getElementById('pilihan-jawaban');
+            containerPilihan.innerHTML = "";
+            
+            s.a.forEach((opt, i) => {
+                const item = document.createElement('div');
+                item.className = "p-4 border-2 rounded-xl cursor-pointer hover:bg-blue-50 transition border-slate-100";
+                item.innerHTML = `<label class="flex items-center gap-3 cursor-pointer w-full">
+                    <input type="radio" name="wpt" value="${i}" class="w-4 h-4"> ${opt}
+                </label>`;
+                item.onclick = () => {
+                    item.querySelector('input').checked = true;
+                    jawabanTerpilih = i;
+                };
+                containerPilihan.appendChild(item);
+            });
+            
+            if(idx === daftarSoal.length - 1) document.getElementById('btnNext').innerText = "Kirim Hasil";
+        };
+
+        // FUNGSI NEXT
+        window.nextQuestion = async () => {
+            if(jawabanTerpilih === null) return alert("Pilih jawaban dulu!");
+            
+            if(jawabanTerpilih === daftarSoal[idx].c) skor++;
+            
+            idx++;
+            jawabanTerpilih = null;
+
+            if(idx < daftarSoal.length) {
+                window.tampilkanSoal();
+            } else {
+                await kirimKeFirebase();
+            }
+        };
+
+        async function kirimKeFirebase() {
+            const user = JSON.parse(localStorage.getItem('pesertaAktif')) || {nama: "Peserta Anonim"};
+            document.getElementById('soal-area').innerHTML = "<p class='text-center py-10'>Mengirim data...</p>";
+            
+            try {
+                await addDoc(collection(db, "hasil_tes"), {
+                    nama: user.nama,
+                    tes: "WPT",
+                    skor: skor,
+                    waktu: new Date().toLocaleString()
+                });
+                alert("Tes Selesai! Data Anda sudah masuk di Dashboard Admin.");
+                window.location.href = "pilih-tes.html";
+            } catch (e) {
+                alert("Gagal kirim data. Cek koneksi internet.");
+            }
+        }
+
+        // TIMER
+        setInterval(() => {
+            if(timeLeft > 0) {
+                timeLeft--;
+                let m = Math.floor(timeLeft / 60); let s = timeLeft % 60;
+                document.getElementById('timer').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+            } else {
+                kirimKeFirebase();
+            }
+        }, 1000);
+
+        // JALANKAN PERTAMA KALI
+        window.tampilkanSoal();
+    </script>
+</body>
+</html>

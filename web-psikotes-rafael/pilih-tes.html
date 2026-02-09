@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pilih Tes | TilikPsikologi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans">
+
+    <div class="container mx-auto max-w-2xl py-20 px-6 text-center">
+        <h2 class="text-3xl font-bold text-blue-900 mb-2">Halo, <span id="namaUser">Peserta</span>!</h2>
+        <p class="text-slate-500 mb-10">Silakan pilih alat tes yang ingin dikerjakan sesuai instruksi penguji.</p>
+
+        <div class="grid gap-4">
+            <a href="wpt.html" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:border-blue-500 hover:shadow-md transition flex justify-between items-center group">
+                <div class="text-left">
+                    <h3 class="font-bold text-lg group-hover:text-blue-600">Tes WPT (Kognitif)</h3>
+                    <p class="text-xs text-slate-400">Durasi: 12 Menit</p>
+                </div>
+                <span class="text-blue-600">Mulai →</span>
+            </a>
+
+            <a href="disc.html" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:border-blue-500 hover:shadow-md transition flex justify-between items-center group">
+                <div class="text-left">
+                    <h3 class="font-bold text-lg group-hover:text-blue-600">Tes DISC (Kepribadian)</h3>
+                    <p class="text-xs text-slate-400">Tanpa Batas Waktu</p>
+                </div>
+                <span class="text-blue-600">Mulai →</span>
+            </a>
+
+            <a href="kraepelin.html" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:border-blue-500 hover:shadow-md transition flex justify-between items-center group">
+                <div class="text-left">
+                    <h3 class="font-bold text-lg group-hover:text-blue-600">Tes Kraepelin (Kinerja)</h3>
+                    <p class="text-xs text-slate-400">Durasi: 10 Kolom x 30 Detik</p>
+                </div>
+                <span class="text-blue-600">Mulai →</span>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Ambil nama dari registrasi
+        const data = JSON.parse(localStorage.getItem('pesertaAktif'));
+        if(data) document.getElementById('namaUser').innerText = data.nama;
+    </script>
+</body>
+</html>

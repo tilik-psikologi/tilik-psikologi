@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 p-10">
+    <div class="max-w-4xl mx-auto bg-white p-8 rounded-2xl shadow">
+        <h2 class="text-2xl font-bold mb-6">Hasil Tes Real-time</h2>
+        <table class="w-full text-left">
+            <thead><tr class="bg-slate-100"><th class="p-4">Nama</th><th class="p-4">Tes</th><th class="p-4">Skor</th><th class="p-4">Waktu</th></tr></thead>
+            <tbody id="data-list"></tbody>
+        </table>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBZsXx_T5-5bKp14BLhuZGNfj4Ils71nVA",
+            authDomain: "tilikpsikologi-cbt.firebaseapp.com",
+            projectId: "tilikpsikologi-cbt",
+            storageBucket: "tilikpsikologi-cbt.firebasestorage.app",
+            messagingSenderId: "940142802410",
+            appId: "1:940142802410:web:5e6579568ed2774d9a2e93"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        onSnapshot(collection(db, "hasil_tes"), (snap) => {
+            const list = document.getElementById('data-list'); list.innerHTML = "";
+            snap.forEach(doc => {
+                const d = doc.data();
+                list.innerHTML += `<tr class="border-b"><td class="p-4 font-bold">${d.nama}</td><td class="p-4">${d.tes}</td><td class="p-4 text-blue-600">${d.skor}</td><td class="p-4 text-xs">${d.waktu}</td></tr>`;
+            });
+        });
+    </script>
+</body>
+</html>

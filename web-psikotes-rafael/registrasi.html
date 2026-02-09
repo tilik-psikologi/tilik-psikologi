@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrasi | TilikPsikologi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 py-10">
+    <div class="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-lg border border-slate-200">
+        <h2 class="text-2xl font-bold text-blue-900 mb-6">Data Diri Peserta</h2>
+        <form id="formReg">
+            <div class="mb-4">
+                <label class="block text-sm font-bold mb-2">Nama Lengkap</label>
+                <input type="text" id="nama" required class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="mb-6">
+                <label class="flex items-start gap-2 cursor-pointer">
+                    <input type="checkbox" required class="mt-1">
+                    <span class="text-xs text-slate-500">Saya setuju mengikuti tes ini sesuai prosedur HIMPSI dan data saya akan dijaga kerahasiaannya.</span>
+                </label>
+            </div>
+            <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition">
+                Masuk ke Menu Tes
+            </button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('formReg').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const nama = document.getElementById('nama').value;
+            localStorage.setItem('pesertaAktif', JSON.stringify({nama: nama}));
+            
+            // PERHATIKAN INI: Nama file harus sama dengan file pilih-tes.html
+            window.location.href = 'pilih-tes.html';
+        });
+    </script>
+</body>
+</html>
