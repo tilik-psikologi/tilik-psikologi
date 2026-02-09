@@ -4,42 +4,100 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tes DISC | Tilik Psikologi</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>body { font-family: 'Poppins', sans-serif; }</style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body { font-family: 'Poppins', sans-serif; user-select: none; background-color: #0f172a; color: white; }
+        .option-card {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .option-card:hover {
+            border-color: #3b82f6;
+            background-color: #1e3a8a;
+            transform: translateY(-2px);
+        }
+        .option-card:active {
+            transform: scale(0.98);
+        }
+        .glass {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
 </head>
-<body class="bg-slate-50 text-slate-900">
+<body class="min-h-screen flex flex-col items-center p-6 bg-slate-950">
 
-    <div class="container mx-auto px-6 py-12 max-w-2xl">
-        <!-- Progress -->
-        <div class="mb-12">
-            <div class="flex justify-between text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">
-                <span>Progress Tes</span>
-                <span id="progress-text">1 / 24</span>
+    <!-- Header & Progress -->
+    <div id="test-header" class="w-full max-w-2xl mb-12 mt-4">
+        <div class="flex justify-between items-end mb-4">
+            <div>
+                <h1 class="text-2xl font-black text-white tracking-tight">Tes <span class="text-blue-500">DISC</span></h1>
+                <p class="text-xs text-slate-500 font-bold uppercase tracking-widest">Kepribadian & Perilaku</p>
             </div>
-            <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-                <div id="progress-bar" class="bg-blue-600 h-full transition-all duration-500" style="width: 4%"></div>
+            <div class="text-right">
+                <span id="progress-text" class="text-sm font-black text-blue-400">1 / 24</span>
             </div>
         </div>
-
-        <!-- Kartu Soal -->
-        <div id="test-card" class="bg-white p-10 rounded-[2.5rem] shadow-xl border border-slate-100">
-            <h2 class="text-blue-600 font-bold text-sm uppercase mb-4">Pilih satu yang paling sesuai:</h2>
-            <div id="options-container" class="space-y-4">
-                <!-- Opsi di-generate JS -->
-            </div>
+        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden shadow-inner">
+            <div id="progress-bar" class="bg-blue-600 h-full transition-all duration-500 ease-out" style="width: 4%"></div>
         </div>
+    </div>
 
-        <!-- Hasil -->
-        <div id="result-screen" class="hidden text-center bg-white p-10 rounded-[2.5rem] shadow-xl border border-slate-100">
-            <h2 class="text-2xl font-bold text-blue-900 mb-6">Hasil Analisis DISC</h2>
-            <div class="grid grid-cols-2 gap-4 mb-8">
-                <div class="p-4 bg-red-50 rounded-2xl"><p class="text-xs font-bold text-red-600">D</p><h3 id="score-D" class="text-2xl font-black">0</h3></div>
-                <div class="p-4 bg-yellow-50 rounded-2xl"><p class="text-xs font-bold text-yellow-600">I</p><h3 id="score-I" class="text-2xl font-black">0</h3></div>
-                <div class="p-4 bg-green-50 rounded-2xl"><p class="text-xs font-bold text-green-600">S</p><h3 id="score-S" class="text-2xl font-black">0</h3></div>
-                <div class="p-4 bg-blue-50 rounded-2xl"><p class="text-xs font-bold text-blue-600">C</p><h3 id="score-C" class="text-2xl font-black">0</h3></div>
+    <!-- Main Test Area -->
+    <div id="test-container" class="w-full max-w-2xl glass rounded-[2.5rem] p-10 shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div class="text-center mb-10">
+            <h2 class="text-lg font-semibold text-slate-200 leading-relaxed">Pilih satu pernyataan yang paling menggambarkan diri Anda saat ini:</h2>
+        </div>
+        
+        <div id="options-grid" class="grid grid-cols-1 gap-4">
+            <!-- Pilihan akan di-generate oleh JavaScript -->
+        </div>
+    </div>
+
+    <!-- Layar Hasil -->
+    <div id="result-screen" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-6 bg-slate-950">
+        <div class="text-center w-full max-w-md animate-in zoom-in duration-500">
+            <div class="w-20 h-20 bg-blue-600 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-xl shadow-blue-900/20">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
             </div>
-            <a href="index.html" class="text-blue-600 font-bold hover:underline">Selesai & Beranda</a>
+            
+            <h2 class="text-3xl font-black text-white mb-2 tracking-tight">Analisis Selesai</h2>
+            <p class="text-slate-400 mb-10 text-sm">Berikut adalah profil kepribadian Anda:</p>
+            
+            <div class="grid grid-cols-2 gap-4 mb-10">
+                <div class="bg-slate-900/50 border border-slate-800 p-6 rounded-3xl">
+                    <p class="text-[10px] font-bold text-red-500 uppercase tracking-widest mb-1">Dominance</p>
+                    <h3 id="score-D" class="text-4xl font-black text-white">0</h3>
+                </div>
+                <div class="bg-slate-900/50 border border-slate-800 p-6 rounded-3xl">
+                    <p class="text-[10px] font-bold text-yellow-500 uppercase tracking-widest mb-1">Influence</p>
+                    <h3 id="score-I" class="text-4xl font-black text-white">0</h3>
+                </div>
+                <div class="bg-slate-900/50 border border-slate-800 p-6 rounded-3xl">
+                    <p class="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mb-1">Steadiness</p>
+                    <h3 id="score-S" class="text-4xl font-black text-white">0</h3>
+                </div>
+                <div class="bg-slate-900/50 border border-slate-800 p-6 rounded-3xl">
+                    <p class="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-1">Compliance</p>
+                    <h3 id="score-C" class="text-4xl font-black text-white">0</h3>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-3">
+                <button onclick="downloadPDF()" class="w-full py-5 bg-blue-600 text-white rounded-2xl font-bold text-lg hover:bg-blue-700 shadow-lg shadow-blue-900/20 transition-all flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                    Simpan Laporan (PDF)
+                </button>
+                <a href="index.html" class="text-slate-500 font-bold text-sm uppercase tracking-widest py-3 hover:text-white transition">Kembali ke Beranda</a>
+            </div>
         </div>
     </div>
 
@@ -47,48 +105,142 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        const firebaseConfig = { apiKey: "AIzaSyBZsXx_T5-5bKp14BLhuZGNfj4Ils71nVA", authDomain: "tilikpsikologi-cbt.firebaseapp.com", projectId: "tilikpsikologi-cbt", storageBucket: "tilikpsikologi-cbt.firebasestorage.app", messagingSenderId: "940142802410", appId: "1:940142802410:web:5e6579568ed2774d9a2e93" };
+        const firebaseConfig = { 
+            apiKey: "AIzaSyBZsXx_T5-5bKp14BLhuZGNfj4Ils71nVA", 
+            authDomain: "tilikpsikologi-cbt.firebaseapp.com", 
+            projectId: "tilikpsikologi-cbt", 
+            storageBucket: "tilikpsikologi-cbt.firebasestorage.app", 
+            messagingSenderId: "940142802410", 
+            appId: "1:940142802410:web:5e6579568ed2774d9a2e93" 
+        };
+
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // Data Soal DISC (Contoh simulasi beberapa soal)
         const questions = [
-            { options: [{t:"Tegas & Dominan", c:"D"}, {t:"Ceria & Persuasif", c:"I"}, {t:"Tenang & Sabar", c:"S"}, {t:"Teliti & Rinci", c:"C"}] },
-            { options: [{t:"Ambisius", c:"D"}, {t:"Komunikatif", c:"I"}, {t:"Penyayang", c:"S"}, {t:"Sistematis", c:"C"}] }
-            // Tambahkan soal lainnya di sini
+            { options: [{t:"Tegas, berani mengambil risiko", c:"D"}, {t:"Suka meyakinkan orang lain", c:"I"}, {t:"Suka membantu & kooperatif", c:"S"}, {t:"Suka dengan data & ketelitian", c:"C"}] },
+            { options: [{t:"Berorientasi pada hasil akhir", c:"D"}, {t:"Optimis & penuh semangat", c:"I"}, {t:"Pendengar yang baik", c:"S"}, {t:"Sistematis & terencana", c:"C"}] },
+            { options: [{t:"Langsung pada intinya", c:"D"}, {t:"Suka menjadi pusat perhatian", c:"I"}, {t:"Menghindari konflik", c:"S"}, {t:"Berpikir sebelum bertindak", c:"C"}] },
+            { options: [{t:"Kompetitif", c:"D"}, {t:"Populer", c:"I"}, {t:"Sabar", c:"S"}, {t:"Sempurna", c:"C"}] },
+            { options: [{t:"Pembuat keputusan", c:"D"}, {t:"Pemberi inspirasi", c:"I"}, {t:"Penyelesai masalah", c:"S"}, {t:"Penganalisa", c:"C"}] }
+            // Soal bisa dilanjutkan hingga 24 nomor
         ];
 
         let currentQ = 0;
-        let scores = { D:0, I:0, S:0, C:0 };
+        let scores = { D: 0, I: 0, S: 0, C: 0 };
+        let isFinished = false;
 
         function loadQuestion() {
-            if(currentQ >= questions.length) return finish();
+            if (currentQ >= questions.length) {
+                finishTest();
+                return;
+            }
+
             const q = questions[currentQ];
             document.getElementById('progress-text').innerText = `${currentQ + 1} / ${questions.length}`;
             document.getElementById('progress-bar').style.width = `${((currentQ + 1) / questions.length) * 100}%`;
+
+            const grid = document.getElementById('options-grid');
+            grid.innerHTML = "";
             
-            const container = document.getElementById('options-container');
-            container.innerHTML = "";
             q.options.forEach(opt => {
                 const btn = document.createElement('button');
-                btn.className = "w-full p-5 bg-slate-50 border-2 border-transparent hover:border-blue-500 hover:bg-blue-50 rounded-2xl text-left transition-all font-medium";
+                btn.className = "option-card w-full p-6 rounded-3xl text-left text-sm font-medium transition-all duration-300";
                 btn.innerText = opt.t;
-                btn.onclick = () => { scores[opt.c]++; currentQ++; loadQuestion(); };
-                container.appendChild(btn);
+                btn.onclick = () => {
+                    scores[opt.c]++;
+                    currentQ++;
+                    loadQuestion();
+                };
+                grid.appendChild(btn);
             });
         }
 
-        async function finish() {
-            const nama = localStorage.getItem("nama_peserta") || "Peserta";
-            const skorString = `D:${scores.D}, I:${scores.I}, S:${scores.S}, C:${scores.C}`;
-            await addDoc(collection(db, "hasil_tes"), { nama, tes: "DISC", skor: skorString, waktu: new Date().toLocaleString() });
+        async function finishTest() {
+            if (isFinished) return;
+            isFinished = true;
+
+            const nama = localStorage.getItem("nama_peserta") || "Peserta Anonim";
+            const resultString = `D:${scores.D}, I:${scores.I}, S:${scores.S}, C:${scores.C}`;
             
-            document.getElementById('test-card').classList.add('hidden');
+            try {
+                // Simpan ke Firebase
+                await addDoc(collection(db, "hasil_tes"), {
+                    nama: nama,
+                    tes: "DISC",
+                    skor: resultString,
+                    waktu: new Date().toLocaleString('id-ID')
+                });
+            } catch (err) {
+                console.error("Firebase Error:", err);
+            }
+
+            document.getElementById('test-header').classList.add('hidden');
+            document.getElementById('test-container').classList.add('hidden');
             document.getElementById('result-screen').classList.remove('hidden');
+
             document.getElementById('score-D').innerText = scores.D;
             document.getElementById('score-I').innerText = scores.I;
             document.getElementById('score-S').innerText = scores.S;
             document.getElementById('score-C').innerText = scores.C;
         }
+
+        window.downloadPDF = () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const nama = localStorage.getItem("nama_peserta") || "Peserta";
+            const tanggal = new Date().toLocaleString('id-ID');
+
+            // Desain PDF
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(22);
+            doc.setTextColor(30, 64, 175);
+            doc.text("HASIL PROFIL KEPRIBADIAN DISC", 20, 30);
+            
+            doc.setFontSize(14);
+            doc.setTextColor(100, 100, 100);
+            doc.text("Tilik Psikologi - Digital Assessment Center", 20, 40);
+            
+            doc.setLineWidth(0.5);
+            doc.setDrawColor(30, 64, 175);
+            doc.line(20, 45, 190, 45);
+
+            // Data Peserta
+            doc.setFontSize(11);
+            doc.setTextColor(0, 0, 0);
+            doc.setFont("helvetica", "normal");
+            doc.text(`Nama Peserta    : ${nama}`, 20, 60);
+            doc.text(`Tanggal Asesmen : ${tanggal}`, 20, 68);
+            doc.text(`Kategori Tes    : Simulasi DISC Personality`, 20, 76);
+
+            // Tabel Skor
+            doc.setFillColor(248, 250, 252);
+            doc.rect(20, 90, 170, 50, 'F');
+            doc.setFont("helvetica", "bold");
+            doc.text("Ringkasan Skor:", 30, 100);
+            
+            doc.setFont("helvetica", "normal");
+            doc.text(`Dominance (D)  : ${scores.D}`, 35, 110);
+            doc.text(`Influence (I)  : ${scores.I}`, 35, 118);
+            doc.text(`Steadiness (S) : ${scores.S}`, 35, 126);
+            doc.text(`Compliance (C) : ${scores.C}`, 35, 134);
+
+            // Footer Disclaimer (Sesuai Permintaan)
+            doc.setDrawColor(220, 220, 220);
+            doc.line(20, 250, 190, 250);
+            
+            doc.setFont("helvetica", "italic");
+            doc.setFontSize(9);
+            doc.setTextColor(120, 120, 120);
+            
+            const disclaimerText = "Catatan: Hasil ini bersifat simulasi untuk kepentingan akademik dan simulasi mandiri. Jika Anda membutuhkan asesmen psikologi yang valid untuk keperluan profesional, kami sarankan untuk menghubungi psikolog atau konsultan SDM terpercaya.";
+            
+            const splitDisclaimer = doc.splitTextToSize(disclaimerText, 170);
+            doc.text(splitDisclaimer, 20, 260);
+
+            doc.save(`Hasil_DISC_TilikPsikologi_${nama}.pdf`);
+        };
 
         loadQuestion();
     </script>
