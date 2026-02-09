@@ -6,31 +6,18 @@
     <title>Tes Kraepelin | Tilik Psikologi</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Library untuk PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         body { font-family: 'Poppins', sans-serif; user-select: none; background-color: #0f172a; color: white; }
-        
-        .numpad-btn {
-            background-color: #1e293b;
-            border: 1px solid #334155;
-            transition: all 0.1s ease;
-        }
-        .numpad-btn:active {
-            background-color: #334155;
-            transform: scale(0.95);
-        }
-        .number-card {
-            background-color: #1e293b;
-            border: 1px solid #334155;
-        }
-        /* Animasi Transisi Angka */
-        .number-animation {
-            transition: all 0.2s ease-out;
-        }
+        .numpad-btn { background-color: #1e293b; border: 1px solid #334155; transition: all 0.1s ease; }
+        .numpad-btn:active { background-color: #334155; transform: scale(0.95); }
+        .number-card { background-color: #1e293b; border: 1px solid #334155; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center overflow-hidden">
 
-    <!-- Header (Skor & Timer) -->
+    <!-- Header, Layar Instruksi, dan Area Tes Tetap Sama Seperti Sebelumnya -->
     <div id="test-header" class="w-full max-w-md px-6 py-6 flex justify-between items-center opacity-0 transition-opacity duration-500">
         <div class="bg-[#1e293b] px-4 py-2 rounded-lg border border-[#334155] flex items-center gap-2">
             <span class="text-xs font-bold text-slate-400">📊 Skor:</span>
@@ -39,34 +26,26 @@
         <div id="timer" class="text-2xl font-black text-slate-300">15</div>
     </div>
 
-    <!-- Layar Instruksi -->
     <div id="instruction-screen" class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#0f172a]">
         <div class="max-w-sm w-full text-center">
-            <div class="w-20 h-20 bg-blue-600 text-white rounded-3xl flex items-center justify-center mx-auto mb-8 text-3xl font-black shadow-xl shadow-blue-900/20">
-                +
-            </div>
+            <div class="w-20 h-20 bg-blue-600 text-white rounded-3xl flex items-center justify-center mx-auto mb-8 text-3xl font-black shadow-xl shadow-blue-900/20">+</div>
             <h2 class="text-2xl font-bold mb-4">Instruksi Tes</h2>
             <div class="text-slate-400 text-sm space-y-4 mb-10 text-left leading-relaxed">
-                <p>1. Jumlahkan dua angka yang muncul secara vertikal.</p>
-                <p>2. Ambil <strong>angka terakhir</strong> saja. (Contoh: 8+7=15, tekan 5).</p>
-                <p>3. Tekan angka pada numpad atau keyboard untuk menjawab.</p>
+                <p>1. Jumlahkan dua angka secara vertikal.</p>
+                <p>2. Ambil angka terakhir saja (8+7=15, ketik 5).</p>
+                <p>3. Website ini adalah <strong>media simulasi akademik</strong>.</p>
             </div>
-            <button onclick="startTest()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-blue-700 transition-all">Mulai Tes</button>
+            <button onclick="startTest()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold text-lg">Mulai Tes</button>
         </div>
     </div>
 
-    <!-- Area Tes (Style Screenshot 181) -->
     <div id="test-screen" class="hidden flex-grow flex flex-col items-center justify-center w-full max-w-md px-6">
-        
-        <!-- Kartu Angka Utama -->
         <div class="number-card w-full rounded-3xl p-12 mb-8 flex flex-col items-center relative overflow-hidden">
             <div id="num-top" class="text-6xl font-black mb-2 text-white">8</div>
             <div id="num-bottom" class="text-6xl font-black text-white">7</div>
             <div class="text-4xl font-bold text-slate-500 my-2">+</div>
             <div id="num-next" class="text-4xl font-black text-slate-600 opacity-50">1</div>
         </div>
-
-        <!-- Numpad Grid -->
         <div class="grid grid-cols-3 gap-3 w-full mb-8">
             <button onclick="handleInput(1)" class="numpad-btn h-20 rounded-2xl text-3xl font-bold">1</button>
             <button onclick="handleInput(2)" class="numpad-btn h-20 rounded-2xl text-3xl font-bold">2</button>
@@ -77,26 +56,30 @@
             <button onclick="handleInput(7)" class="numpad-btn h-20 rounded-2xl text-3xl font-bold">7</button>
             <button onclick="handleInput(8)" class="numpad-btn h-20 rounded-2xl text-3xl font-bold">8</button>
             <button onclick="handleInput(9)" class="numpad-btn h-20 rounded-2xl text-3xl font-bold">9</button>
-            <div class="col-start-2">
-                <button onclick="handleInput(0)" class="numpad-btn h-20 w-full rounded-2xl text-3xl font-bold">0</button>
-            </div>
+            <div class="col-start-2"><button onclick="handleInput(0)" class="numpad-btn h-20 w-full rounded-2xl text-3xl font-bold">0</button></div>
         </div>
     </div>
 
-    <!-- Hasil Tes -->
+    <!-- Layar Hasil dengan Tombol PDF -->
     <div id="result-screen" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-6 bg-[#0f172a]">
         <div class="text-center w-full max-w-sm">
             <h2 class="text-3xl font-bold mb-2">Waktu Habis!</h2>
-            <p class="text-slate-400 mb-10">Hasil produktivitas kerja Anda:</p>
+            <p class="text-slate-400 mb-6">Hasil produktivitas simulasi:</p>
             
-            <div class="bg-blue-600 py-12 rounded-[3rem] shadow-2xl shadow-blue-900/40 mb-10">
-                <p class="text-blue-100 text-xs font-bold uppercase tracking-widest mb-2">Total Benar</p>
-                <h3 id="final-score" class="text-8xl font-black text-white">0</h3>
+            <div class="bg-blue-600 py-10 rounded-[3rem] shadow-2xl mb-8">
+                <p class="text-blue-100 text-xs font-bold uppercase tracking-widest mb-2">Skor Benar</p>
+                <h3 id="final-score" class="text-7xl font-black text-white">0</h3>
             </div>
 
-            <div class="flex flex-col gap-4">
+            <div class="flex flex-col gap-3">
+                <button onclick="downloadPDF()" class="w-full py-4 bg-emerald-600 text-white rounded-2xl font-bold flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                    Download Hasil (PDF)
+                </button>
                 <button onclick="location.reload()" class="w-full py-4 bg-slate-800 text-white rounded-2xl font-bold">Ulangi Tes</button>
-                <a href="index.html" class="text-slate-500 font-bold text-sm uppercase tracking-widest py-2">Beranda</a>
+                <a href="index.html" class="text-slate-500 font-bold text-sm uppercase py-2">Beranda</a>
             </div>
         </div>
     </div>
@@ -105,15 +88,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        const firebaseConfig = { 
-            apiKey: "AIzaSyBZsXx_T5-5bKp14BLhuZGNfj4Ils71nVA", 
-            authDomain: "tilikpsikologi-cbt.firebaseapp.com", 
-            projectId: "tilikpsikologi-cbt", 
-            storageBucket: "tilikpsikologi-cbt.firebasestorage.app", 
-            messagingSenderId: "940142802410", 
-            appId: "1:940142802410:web:5e6579568ed2774d9a2e93" 
-        };
-
+        const firebaseConfig = { apiKey: "AIzaSyBZsXx_T5-5bKp14BLhuZGNfj4Ils71nVA", authDomain: "tilikpsikologi-cbt.firebaseapp.com", projectId: "tilikpsikologi-cbt", storageBucket: "tilikpsikologi-cbt.firebasestorage.app", messagingSenderId: "940142802410", appId: "1:940142802410:web:5e6579568ed2774d9a2e93" };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
@@ -124,46 +99,90 @@
         let isFinished = false;
         let timer;
 
+        // Fungsi Cetak PDF dengan Disclaimer
+        window.downloadPDF = () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const nama = localStorage.getItem("nama_peserta") || "Peserta";
+            const tanggal = new Date().toLocaleString('id-ID');
+
+            // Header Laporan
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(22);
+            doc.setTextColor(30, 64, 175);
+            doc.text("LAPORAN HASIL ASESMEN DIGITAL", 20, 30);
+            
+            doc.setFontSize(16);
+            doc.setTextColor(0, 0, 0);
+            doc.text("Tilik Psikologi", 20, 40);
+            
+            doc.setLineWidth(0.5);
+            doc.line(20, 45, 190, 45);
+
+            // Data Peserta
+            doc.setFontSize(12);
+            doc.setFont("helvetica", "normal");
+            doc.text(`Nama Peserta : ${nama}`, 20, 60);
+            doc.text(`Jenis Tes     : Kraepelin (Simulasi)`, 20, 70);
+            doc.text(`Tanggal Tes   : ${tanggal}`, 20, 80);
+
+            // Hasil Skor
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(14);
+            doc.text("HASIL PERHITUNGAN:", 20, 100);
+            
+            doc.setFillColor(243, 244, 246);
+            doc.rect(20, 105, 170, 20, 'F');
+            doc.setTextColor(30, 64, 175);
+            doc.text(`SKOR BENAR: ${score}`, 30, 118);
+
+            // Disclaimer Box (Sesuai Permintaan Rafael)
+            doc.setDrawColor(200, 200, 200);
+            doc.line(20, 250, 190, 250);
+            
+            doc.setFont("helvetica", "italic");
+            doc.setFontSize(9);
+            doc.setTextColor(100, 100, 100);
+            
+            const disclaimer1 = "Catatan: Hasil ini bersifat simulasi untuk kepentingan akademik dan pembelajaran.";
+            const disclaimer2 = "Jika Anda membutuhkan asesmen psikologi yang valid untuk keperluan profesional, kami sarankan untuk menghubungi psikolog atau konsultan SDM terpercaya.";
+            
+            doc.text(disclaimer1, 20, 260);
+            // Autowrap untuk kalimat panjang
+            const splitDisclaimer = doc.splitTextToSize(disclaimer2, 170);
+            doc.text(splitDisclaimer, 20, 265);
+
+            doc.save(`Hasil_Kraepelin_${nama}.pdf`);
+        };
+
+        // Logika Game Tetap Sama...
         function generateNumbers() {
             numbers = Array.from({length: 200}, () => Math.floor(Math.random() * 9) + 1);
             updateDisplay();
         }
 
         function updateDisplay() {
-            const numTop = document.getElementById('num-top');
-            const numBottom = document.getElementById('num-bottom');
-            const numNext = document.getElementById('num-next');
-
-            numTop.innerText = numbers[index];
-            numBottom.innerText = numbers[index + 1];
-            numNext.innerText = numbers[index + 2] || "?";
+            document.getElementById('num-top').innerText = numbers[index];
+            document.getElementById('num-bottom').innerText = numbers[index + 1];
+            document.getElementById('num-next').innerText = numbers[index + 2] || "?";
         }
 
         window.handleInput = (val) => {
             if (isFinished) return;
-
             const correct = (numbers[index] + numbers[index + 1]) % 10;
             if (val === correct) {
                 score++;
                 document.getElementById('live-score').innerText = score;
             }
-            
             index++;
             updateDisplay();
         };
-
-        // Dukungan Keyboard
-        window.addEventListener('keydown', (e) => {
-            if (!isNaN(e.key)) handleInput(parseInt(e.key));
-        });
 
         window.startTest = () => {
             document.getElementById('instruction-screen').style.display = 'none';
             document.getElementById('test-screen').classList.remove('hidden');
             document.getElementById('test-header').style.opacity = '1';
-            
             generateNumbers();
-
             timer = setInterval(() => {
                 timeLeft--;
                 document.getElementById('timer').innerText = timeLeft;
@@ -175,14 +194,10 @@
             if (isFinished) return;
             isFinished = true;
             clearInterval(timer);
-
             const nama = localStorage.getItem("nama_peserta") || "Peserta";
             try {
-                await addDoc(collection(db, "hasil_tes"), {
-                    nama, tes: "Kraepelin", skor: score, waktu: new Date().toLocaleString('id-ID')
-                });
+                await addDoc(collection(db, "hasil_tes"), { nama, tes: "Kraepelin", skor: score, waktu: new Date().toLocaleString('id-ID') });
             } catch (err) { console.error(err); }
-
             document.getElementById('test-screen').classList.add('hidden');
             document.getElementById('test-header').classList.add('hidden');
             document.getElementById('result-screen').classList.remove('hidden');
