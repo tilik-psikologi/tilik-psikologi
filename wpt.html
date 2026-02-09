@@ -15,7 +15,6 @@
         .skip-btn { border: 1px dashed #475569; color: #94a3b8; transition: all 0.2s; }
         .skip-btn:hover { background-color: rgba(71, 85, 105, 0.2); color: white; border-style: solid; border-color: white; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        /* Hilangkan scrollbar saat mode layar penuh */
         :fullscreen body { overflow: hidden; }
     </style>
 </head>
@@ -35,15 +34,15 @@
         </div>
     </div>
 
-    <!-- Instruksi Awal (Full Screen Trigger) -->
+    <!-- Instruksi Awal -->
     <div id="instruction-screen" class="fixed inset-0 z-[150] bg-slate-950 flex items-center justify-center p-6 text-center">
         <div class="max-w-md w-full bg-[#1e293b] rounded-[2.5rem] p-10 border border-[#334155] shadow-2xl">
             <div class="w-16 h-16 bg-blue-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-6 text-2xl font-black shadow-lg shadow-blue-900/20">?</div>
             <h2 class="text-2xl font-bold mb-4">Instruksi WPT</h2>
             <div class="text-slate-400 text-sm mb-8 leading-relaxed text-left space-y-3">
                 <p>1. Tes ini mengukur kemampuan pemecahan masalah (50 soal, 12 Menit).</p>
-                <p>2. <span class="text-blue-400 font-bold underline">KEAMANAN:</span> Tes ini akan berjalan dalam <strong>Mode Layar Penuh</strong>. Anda dilarang keluar dari halaman atau membuka tab lain.</p>
-                <p>3. Jika Anda keluar dari mode layar penuh atau berpindah tab, tes akan <strong>diakhiri secara otomatis</strong>.</p>
+                <p>2. <span class="text-blue-400 font-bold underline">KEAMANAN:</span> Tes akan berjalan dalam <strong>Mode Layar Penuh</strong>. Anda dilarang membuka tab lain atau keluar halaman.</p>
+                <p>3. Jika Anda menemui soal sulit, gunakan tombol <strong>"Loncati Soal"</strong> untuk lanjut. Soal tersebut akan muncul kembali di akhir.</p>
             </div>
             <button onclick="enterFullScreenAndStart()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-blue-700 transition-all">Mulai Layar Penuh</button>
         </div>
@@ -55,8 +54,8 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mx-auto mb-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
-            <h2 class="text-4xl font-black mb-4">PERINGATAN!</h2>
-            <p class="text-lg font-medium mb-8">Anda terdeteksi mencoba meninggalkan halaman tes. Silakan kembali ke layar penuh atau tes akan dibatalkan.</p>
+            <h2 class="text-4xl font-black mb-4">PELANGGARAN!</h2>
+            <p class="text-lg font-medium mb-8">Jangan meninggalkan halaman tes. Kembalilah ke layar penuh segera atau tes akan dianggap selesai otomatis.</p>
             <button onclick="resumeFullScreen()" class="bg-white text-red-600 px-8 py-3 rounded-xl font-bold uppercase tracking-widest">Kembali ke Tes</button>
         </div>
     </div>
@@ -68,7 +67,7 @@
         </div>
         
         <div id="options-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
-            <!-- Pilihan dimuat di sini -->
+            <!-- Opsi diisi via JS -->
         </div>
 
         <div class="border-t border-slate-700 pt-8 flex justify-center">
@@ -81,26 +80,20 @@
         </div>
     </div>
 
-    <!-- Layar Hasil -->
+    <!-- Skrin Hasil -->
     <div id="result-screen" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-6 bg-slate-950 overflow-y-auto">
         <div class="text-center w-full max-w-xl py-12">
-            <div class="w-24 h-24 bg-emerald-600 rounded-full flex items-center justify-center mx-auto mb-8 shadow-2xl">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                </svg>
-            </div>
-            
-            <h2 class="text-4xl font-black text-white mb-2 tracking-tight">Selesai</h2>
-            <p class="text-slate-500 mb-10">Hasil analisis kognitif simulasi Anda:</p>
+            <h2 class="text-4xl font-black text-white mb-2 tracking-tight">Tes Selesai</h2>
+            <p class="text-slate-500 mb-10">Hasil produktivitas kognitif simulasi Anda:</p>
             
             <div class="bg-blue-600 py-12 rounded-[4rem] shadow-2xl shadow-blue-900/40 mb-10">
-                <p class="text-blue-100 text-xs font-bold uppercase tracking-widest mb-2">Jumlah Benar (Skor Mentah)</p>
+                <p class="text-blue-100 text-xs font-bold uppercase tracking-widest mb-2">Total Benar</p>
                 <h3 id="final-score" class="text-8xl font-black text-white">0</h3>
             </div>
 
             <div class="bg-slate-900/50 border border-slate-800 p-8 rounded-[2.5rem] text-left mb-10">
-                <h4 class="text-blue-400 font-bold text-xs uppercase tracking-widest mb-4">Kesimpulan Objektif</h4>
-                <p id="conclusion-text" class="text-slate-300 text-sm leading-relaxed italic">Menganalisis hasil...</p>
+                <h4 class="text-blue-400 font-bold text-xs uppercase tracking-widest mb-4 italic">Kesimpulan Objektif</h4>
+                <p id="conclusion-text" class="text-slate-300 text-sm leading-relaxed">Menganalisis skor...</p>
             </div>
 
             <div class="flex flex-col gap-3">
@@ -114,17 +107,15 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Konfigurasi Firebase
         const firebaseConfig = { apiKey: "AIzaSyBZsXx_T5-5bKp14BLhuZGNfj4Ils71nVA", authDomain: "tilikpsikologi-cbt.firebaseapp.com", projectId: "tilikpsikologi-cbt", storageBucket: "tilikpsikologi-cbt.firebasestorage.app", messagingSenderId: "940142802410", appId: "1:940142802410:web:5e6579568ed2774d9a2e93" };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Data Soal (50 soal dari WPT.docx)
         const questions = [
-            { q: "Kaki berhubungan dengan Sepatu seperti Kepala berhubungan dengan...", o: ["Rambut", "Topi", "Otak", "Helm"], a: 1 },
-            { q: "5, 10, 15, 20, ... Berapa angka selanjutnya?", o: ["21", "25", "30", "35"], a: 1 },
+            { q: "Kaki berhubungan dengan Sepatu seperti Kepala berhubungan dengan...", o: ["Rambut", "Topi", "Otak", "Helm"], a: 3 },
+            { q: "5, 10, 15, 20, ... Angka selanjutnya adalah?", o: ["21", "25", "30", "35"], a: 1 },
             { q: "Harga 1 pensil Rp 2.000. Berapa harga 5 pensil?", o: ["Rp 7.000", "Rp 10.000", "Rp 12.000", "Rp 15.000"], a: 1 },
-            { q: "Lawan kata dari TINGGI adalah...", o: ["Jangkung", "Pendek", "Rendah", "Kerdil"], a: 1 },
+            { q: "Lawan kata dari TINGGI adalah...", o: ["Jangkung", "Pendek", "Rendah", "Kerdil"], a: 2 },
             { q: "Jika semua A adalah B, dan beberapa B adalah C, maka:", o: ["Semua A adalah C", "Beberapa A mungkin C", "Tidak ada A yang C", "Semua C adalah A"], a: 1 },
             { q: "A, C, E, G, ... Huruf selanjutnya adalah?", o: ["H", "I", "J", "K"], a: 1 },
             { q: "Pukul 08:00 ditambah 2 jam 30 menit adalah pukul?", o: ["10:00", "10:30", "10:45", "11:00"], a: 1 },
@@ -147,87 +138,69 @@
             { q: "3, 6, 12, 24, ... Angka selanjutnya?", o: ["36", "42", "48", "56"], a: 2 },
             { q: "Mata untuk Melihat seperti Telinga untuk ...", o: ["Rambut", "Mendengar", "Berdiri", "Bernapas"], a: 1 },
             { q: "Gula : Manis || Cuka : ?", o: ["Asin", "Asam", "Pahit", "Pedas"], a: 1 },
-            { q: "1, 1, 2, 3, 5, 8, 13, ... (Deret Fibonacci). Angka selanjutnya?", o: ["18", "21", "24", "26"], a: 1 },
+            { q: "1, 1, 2, 3, 5, 8, 13, ... (Fibonacci). Angka selanjutnya?", o: ["18", "21", "24", "26"], a: 1 },
             { q: "Jika beberapa X adalah Y, dan semua Y adalah Z, maka:", o: ["Semua X adalah Z", "Beberapa X adalah Z", "Tidak ada X yang Z", "Semua Z adalah X"], a: 1 },
             { q: "Mana yang berbeda?", o: ["Persegi", "Lingkaran", "Segitiga", "Kubus"], a: 3 },
-            { q: "Sebuah pesta dihadiri 30 orang. Mereka berjabat tangan sekali dengan setiap orang. Ada berapa jabat tangan?", o: ["435", "450", "870", "900"], a: 0 },
-            { q: "8, 5, 4, 9, 1, 7, 6, ... Angka selanjutnya?", o: ["2", "3", "10", "11"], a: 2 },
-            { q: "Sebuah bilangan dikali 3, lalu ditambah 12, hasilnya 42. Berapakah bilangan awal?", o: ["8", "10", "12", "14"], a: 1 },
-            { q: "2, 3, 5, 7, 11, 13, ... (Bilangan prima). Angka selanjutnya?", o: ["15", "17", "19", "21"], a: 1 },
-            { q: "Jika 'ROTI' dikodekan menjadi 'UPRG', maka 'SUSU' dikodekan menjadi?", o: ["VXVX", "VVXX", "XVXV", "XXVV"], a: 0 },
-            { q: "Sebuah tangga memiliki 15 anak tangga. Jika naik 2 turun 1, berapa langkah untuk sampai puncak?", o: ["14", "21", "28", "29"], a: 2 },
-            { q: "A adalah anak dari B. C adalah saudara kandung A. D adalah orang tua dari B. Hubungan D dengan C adalah?", o: ["Kakek/Nenek", "Paman/Bibi", "Sepupu", "Saudara"], a: 0 },
+            { q: "Pesta 30 orang. Berjabat tangan sekali setiap orang. Ada berapa jabat tangan?", o: ["435", "450", "870", "900"], a: 0 },
+            { q: "8, 5, 4, 9, 1, 7, 6, ... Angka selanjutnya? (Alfabetis Inggris)", o: ["2", "3", "10", "11"], a: 2 },
+            { q: "Bilangan dikali 3, ditambah 12, hasilnya 42. Bilangan awal?", o: ["8", "10", "12", "14"], a: 1 },
+            { q: "2, 3, 5, 7, 11, 13, ... Angka selanjutnya?", o: ["15", "17", "19", "21"], a: 1 },
+            { q: "Jika 'ROTI' jadi 'UPRG', maka 'SUSU' jadi?", o: ["VXVX", "VVXX", "XVXV", "XXVV"], a: 0 },
+            { q: "Tangga 15 anak tangga. Naik 2 turun 1. Berapa langkah sampai puncak?", o: ["14", "21", "28", "29"], a: 2 },
+            { q: "A anak B. C saudara A. D orang tua B. D dengan C?", o: ["Kakek/Nenek", "Paman/Bibi", "Sepupu", "Saudara"], a: 0 },
             { q: "3, 9, 4, 16, 5, 25, 6, ... Angka selanjutnya?", o: ["30", "36", "49", "64"], a: 1 },
-            { q: "Sebuah jam rusak, setiap 60 menit ia terlambat 4 menit. Setelah 3 jam sebenarnya, jam ini menunjukkan waktu?", o: ["Terlambat 10 menit", "Terlambat 12 menit", "Terlambat 15 menit", "Terlambat 20 menit"], a: 1 },
-            { q: "Jika BANDUNG = 58 dan JAKARTA = 71, maka SURABAYA = ?", o: ["92", "96", "100", "104"], a: 1 },
-            { q: "Pak Andi berusia 4 kali usia anaknya. Dalam 10 tahun, usianya 2 kali usia anaknya. Berapa usia Pak Andi sekarang?", o: ["20 tahun", "30 tahun", "40 tahun", "50 tahun"], a: 2 },
-            { q: "Mana yang tidak konsisten dengan yang lain?", o: ["121", "144", "169", "250"], a: 3 },
+            { q: "Jam terlambat 4 menit tiap jam. Setelah 3 jam, terlambat?", o: ["10 menit", "12 menit", "15 menit", "20 menit"], a: 1 },
+            { q: "BANDUNG = 58, JAKARTA = 71, maka SURABAYA = ?", o: ["92", "96", "100", "104"], a: 1 },
+            { q: "Andi 4x usia anak. Dalam 10 thn jadi 2x anak. Usia Andi?", o: ["20 tahun", "30 tahun", "40 tahun", "50 tahun"], a: 0 },
+            { q: "Mana yang bukan kuadrat sempurna?", o: ["121", "144", "169", "250"], a: 3 },
             { q: "12, 1, 11, 2, 10, 3, 9, ... Angka selanjutnya?", o: ["4", "5", "6", "8"], a: 0 },
-            { q: "Dalam suatu kode, 'BURSA' = 35, 'SAHAM' = 42. Maka 'INDEKS' = ?", o: ["55", "58", "62", "65"], a: 1 },
-            { q: "Botol berisi campuran 1 bagian sirup & 4 bagian air. Ditambah 200ml sirup jadi 1:2. Berapa ml total awal?", o: ["600 ml", "800 ml", "1000 ml", "1200 ml"], a: 1 },
-            { q: "Jika MINGGU = 76, SENIN = 66, maka SELASA = ?", o: ["72", "74", "78", "80"], a: 1 },
-            { q: "Sebuah bilangan, jika dibagi 6 sisa 2, dibagi 8 sisa 4, dibagi 9 sisa 5. Berapa bilangan terkecil yang mungkin?", o: ["50", "68", "86", "104"], a: 1 },
+            { q: "BURSA = 35, SAHAM = 42. INDEKS = ?", o: ["55", "58", "62", "65"], a: 2 },
+            { q: "Campuran 1 sirup 4 air. Tambah 200ml sirup jadi 1:2. Total awal?", o: ["600 ml", "800 ml", "1000 ml", "1200 ml"], a: 2 },
+            { q: "MINGGU = 76, SENIN = 66, maka SELASA = ?", o: ["72", "74", "78", "80"], a: 1 },
+            { q: "Bilangan dibagi 6 sisa 2, bagi 8 sisa 4, bagi 9 sisa 5. Terkecil?", o: ["50", "68", "86", "104"], a: 1 },
             { q: "Z, X, V, T, R, ... Huruf selanjutnya?", o: ["P", "O", "N", "M"], a: 0 },
-            { q: "Dalam turnamen catur, setiap pemain main sekali dengan lawannya. Ada 10 pertandingan. Berapa pemain?", o: ["4", "5", "6", "7"], a: 1 },
-            { q: "Angka puluhan ditukar satuan nilainya berkurang 36. Jika jumlah kedua angka 12, berapa angka asli?", o: ["48", "57", "75", "84"], a: 3 },
+            { q: "Turnamen catur, 10 pertandingan. Berapa pemain?", o: ["4", "5", "6", "7"], a: 1 },
+            { q: "Puluhan ditukar satuan turun 36. Jumlah angka 12. Angka aslinya?", o: ["48", "57", "75", "84"], a: 3 },
             { q: "Jika 5@2 = 29, 3@7 = 58, maka 4@6 = ?", o: ["40", "44", "52", "60"], a: 2 }
         ];
 
         let currentQ = 0;
         let score = 0;
-        let timeLeft = 720; // 12 Minit
+        let timeLeft = 720; 
         let timer;
         let isFinished = false;
         let userAnswers = new Array(questions.length).fill(null);
-        let cheatAttempts = 0;
+        let cheatCount = 0;
 
-        // Fungsi Memasuki Layar Penuh
         window.enterFullScreenAndStart = () => {
-            const elem = document.documentElement;
-            if (elem.requestFullscreen) {
-                elem.requestFullscreen().catch(err => {
-                    console.log(`Error layar penuh: ${err.message}`);
-                });
-            }
+            const el = document.documentElement;
+            if (el.requestFullscreen) el.requestFullscreen();
             startTest();
         };
 
         window.resumeFullScreen = () => {
-            const elem = document.documentElement;
-            if (elem.requestFullscreen) {
-                elem.requestFullscreen();
-            }
+            if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
             document.getElementById('cheat-overlay').classList.add('hidden');
         };
 
-        // Mendeteksi perubahan layar penuh
         document.addEventListener('fullscreenchange', () => {
             if (!document.fullscreenElement && !isFinished) {
                 document.getElementById('cheat-overlay').classList.remove('hidden');
-                cheatAttempts++;
-                if(cheatAttempts >= 3) finishTest(true); // Otomatis selesai jika melanggar terus
+                cheatCount++;
+                if(cheatCount >= 3) finishTest(true);
             }
         });
 
         document.addEventListener('visibilitychange', () => {
             if (document.hidden && !isFinished) {
-                cheatAttempts++;
-                if(cheatAttempts >= 3) finishTest(true);
+                cheatCount++;
+                if(cheatCount >= 3) finishTest(true);
             }
-        });
-
-        // Menonaktifkan shortcut keyboard
-        window.addEventListener('keydown', (e) => {
-            if (e.ctrlKey && (e.key === 'u' || e.key === 's' || e.key === 'c' || e.key === 'v')) {
-                e.preventDefault();
-            }
-            if (e.key === 'F12') e.preventDefault();
         });
 
         function loadQuestion() {
-            const unanswered = userAnswers.map((val, idx) => val === null ? idx : null).filter(val => val !== null);
+            const unanswered = userAnswers.map((v, i) => v === null ? i : null).filter(v => v !== null);
             if (unanswered.length === 0) return finishTest();
-
             if (userAnswers[currentQ] !== null) currentQ = unanswered[0];
 
             const answeredCount = userAnswers.filter(a => a !== null).length;
@@ -241,38 +214,27 @@
             grid.innerHTML = "";
             q.o.forEach((opt, i) => {
                 const btn = document.createElement('button');
-                btn.className = "answer-btn w-full p-6 rounded-3xl text-left font-medium text-lg transition-all";
+                btn.className = "answer-btn w-full p-6 rounded-3xl text-left font-medium text-lg";
                 btn.innerText = opt;
-                btn.onclick = () => handleAnswer(i);
+                btn.onclick = () => { userAnswers[currentQ] = i; moveNext(); };
                 grid.appendChild(btn);
             });
         }
 
-        function handleAnswer(choiceIdx) {
-            userAnswers[currentQ] = choiceIdx;
-            const nextUnanswered = userAnswers.indexOf(null, currentQ + 1);
-            currentQ = nextUnanswered !== -1 ? nextUnanswered : userAnswers.indexOf(null);
+        function moveNext() {
+            const nextIdx = userAnswers.indexOf(null, currentQ + 1);
+            currentQ = nextIdx !== -1 ? nextIdx : userAnswers.indexOf(null);
             loadQuestion();
         }
 
         window.skipQuestion = () => {
-            let nextIdx = userAnswers.indexOf(null, currentQ + 1);
-            if (nextIdx === -1) nextIdx = userAnswers.indexOf(null);
-            if (nextIdx !== -1 && nextIdx !== currentQ) {
-                currentQ = nextIdx;
+            let next = userAnswers.indexOf(null, currentQ + 1);
+            if (next === -1) next = userAnswers.indexOf(null);
+            if (next !== -1 && next !== currentQ) {
+                currentQ = next;
                 loadQuestion();
             }
         };
-
-        function getConclusion() {
-            let finalScore = 0;
-            userAnswers.forEach((ans, idx) => { if (ans === questions[idx].a) finalScore++; });
-            score = finalScore;
-            if (score >= 40) return "Tingkat kemampuan kognitif Sangat Unggul. Anda memiliki logika berpikir yang sangat cepat dan akurat.";
-            if (score >= 30) return "Tingkat kemampuan kognitif Tinggi. Anda mampu memproses informasi dengan baik dan tepat.";
-            if (score >= 20) return "Tingkat kemampuan kognitif Rata-rata (Cukup).";
-            return "Tingkat kemampuan kognitif Perlu Ditingkatkan.";
-        }
 
         window.startTest = () => {
             document.getElementById('instruction-screen').style.display = 'none';
@@ -288,19 +250,26 @@
             }, 1000);
         };
 
+        function getConclusion(finalScore) {
+            if (finalScore >= 40) return "Tingkat kemampuan kognitif Sangat Unggul. Anda memiliki logika berpikir yang sangat cepat dan akurat dalam situasi bertekanan.";
+            if (finalScore >= 30) return "Tingkat kemampuan kognitif Tinggi. Anda mampu memproses informasi dengan baik dan mengambil keputusan yang tepat.";
+            if (finalScore >= 20) return "Tingkat kemampuan kognitif Rata-rata. Kapasitas intelektual Anda memadai untuk menangani tugas-tugas standar.";
+            return "Tingkat kemampuan kognitif Perlu Ditingkatkan. Skor ini mungkin dipengaruhi oleh batas waktu pengerjaan yang ketat.";
+        }
+
         async function finishTest(forced = false) {
             if(isFinished) return;
             isFinished = true;
             clearInterval(timer);
-            
             if (document.fullscreenElement) document.exitFullscreen();
 
-            const conclusion = getConclusion();
+            score = userAnswers.reduce((acc, val, idx) => acc + (val === questions[idx].a ? 1 : 0), 0);
             const nama = localStorage.getItem("nama_peserta") || "Peserta";
+            const conclusion = getConclusion(score);
             
             try {
                 await addDoc(collection(db, "hasil_tes"), {
-                    nama, tes: "WPT", skor: score, waktu: new Date().toLocaleString('id-ID'), catatan: forced ? "DIHENTIKAN PAKSA (PERCOBAAN CURANG)" : "NORMAL"
+                    nama, tes: "WPT", skor: score, waktu: new Date().toLocaleString('id-ID'), catatan: forced ? "DITUTUP PAKSA" : "NORMAL"
                 });
             } catch (err) { console.error(err); }
 
@@ -309,48 +278,38 @@
             document.getElementById('cheat-overlay').classList.add('hidden');
             document.getElementById('result-screen').classList.remove('hidden');
             document.getElementById('final-score').innerText = score;
-            document.getElementById('conclusion-text').innerText = forced ? "Tes Anda dihentikan secara otomatis karena melanggar protokol keamanan (meninggalkan halaman tes)." : conclusion;
+            document.getElementById('conclusion-text').innerText = forced ? "Tes dihentikan otomatis karena pelanggaran protokol keamanan." : conclusion;
         }
 
         window.downloadPDF = () => {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             const nama = localStorage.getItem("nama_peserta") || "Peserta";
-            const conclusion = getConclusion();
-
-            doc.setFont("helvetica", "bold");
+            
             doc.setFontSize(22);
-            doc.setTextColor(30, 64, 175);
-            doc.text("LAPORAN HASIL ASESMEN DIGITAL", 20, 30);
-            doc.setFontSize(16);
-            doc.setTextColor(0, 0, 0);
+            doc.text("LAPORAN HASIL ASESMEN KOGNITIF", 20, 30);
+            doc.setFontSize(14);
             doc.text("Tilik Psikologi", 20, 40);
             doc.line(20, 45, 190, 45);
 
             doc.setFontSize(11);
-            doc.setFont("helvetica", "normal");
             doc.text(`Nama Peserta : ${nama}`, 20, 60);
             doc.text(`Jenis Tes     : Wonderlic Personnel Test (Simulasi)`, 20, 70);
             doc.text(`Skor Benar    : ${score} dari 50 Soal`, 20, 80);
 
-            doc.setFillColor(248, 250, 252);
-            doc.rect(20, 95, 170, 40, 'F');
-            doc.setFont("helvetica", "bold");
-            doc.text("KESIMPULAN OBJEKTIF:", 30, 105);
-            doc.setFont("helvetica", "normal");
-            const splitConclusion = doc.splitTextToSize(conclusion, 150);
-            doc.text(splitConclusion, 30, 115);
+            doc.setFontSize(12);
+            doc.text("KESIMPULAN:", 20, 100);
+            const splitText = doc.splitTextToSize(getConclusion(score), 170);
+            doc.text(splitText, 20, 110);
 
-            doc.setDrawColor(220, 220, 220);
-            doc.line(20, 250, 190, 250);
-            doc.setFont("helvetica", "italic");
-            doc.setFontSize(9);
-            doc.setTextColor(120, 120, 120);
-            const disclaimer = "Simulasi ini hanya untuk tujuan edukasi. Jika Anda membutuhkan asesmen psikologi yang valid, kami sarankan untuk menghubungi psikolog atau konsultan SDM terpercaya.";
-            const splitDisclaimer = doc.splitTextToSize(disclaimer, 170);
-            doc.text(splitDisclaimer, 20, 260);
+            doc.setDrawColor(220, 0, 0);
+            doc.rect(15, 220, 180, 50);
+            doc.setFontSize(8);
+            const disclaimer = "Simulasi ini hanya untuk tujuan edukasi dan pengenalan diri awal. Pernyataan dan metode skoring ini disederhanakan dan TIDAK SAMA dengan instrumen WPT yang valid dan bersertifikasi. Hasilnya tidak dapat dijadikan dasar untuk asesmen psikologis atau seleksi karyawan. Jika Anda membutuhkan asesmen psikologi yang valid untuk keperluan profesional, kami sarankan untuk menghubungi psikolog atau konsultan SDM terpercaya.";
+            const splitDisc = doc.splitTextToSize(disclaimer, 170);
+            doc.text(splitDisc, 20, 230);
 
-            doc.save(`Hasil_WPT_Tilik_${nama}.pdf`);
+            doc.save(`Laporan_WPT_${nama}.pdf`);
         };
     </script>
 </body>
