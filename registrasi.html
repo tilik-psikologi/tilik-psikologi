@@ -9,8 +9,8 @@
     <style>
         body { 
             font-family: 'Poppins', sans-serif; 
-            background-color: #f8fafc; /* Abu-abu sangat muda */
-            color: #1e293b; /* Slate gelap untuk teks */
+            background-color: #f8fafc; 
+            color: #1e293b; 
             overflow-x: hidden;
             touch-action: manipulation;
         }
@@ -54,7 +54,6 @@
 <body class="min-h-screen flex items-center justify-center p-6 hero-gradient">
 
     <div class="w-full max-w-md fade-in">
-        <!-- Header Section -->
         <div class="text-center mb-8">
             <div class="w-20 h-20 bg-blue-50 rounded-[2rem] flex items-center justify-center mx-auto mb-6 shadow-sm border border-blue-100">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -65,10 +64,8 @@
             <p class="text-slate-500 text-sm font-medium px-4">Lengkapi profil singkat Anda untuk mulai simulasi asesmen.</p>
         </div>
 
-        <!-- Form Card -->
         <div class="light-card rounded-[2.5rem] p-8 md:p-10 shadow-xl shadow-slate-200/50">
             <form id="registrationForm" class="space-y-8">
-                <!-- Nama Lengkap -->
                 <div>
                     <label class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 ml-1">Nama Lengkap</label>
                     <input type="text" id="nama_peserta" required 
@@ -76,15 +73,14 @@
                         placeholder="Ketik nama Anda di sini">
                 </div>
 
-                <!-- Gender Selection -->
                 <div>
                     <label class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 ml-1">Jenis Kelamin</label>
                     <div class="grid grid-cols-2 gap-4">
-                        <button type="button" id="btn-laki" onclick="selectGender('Laki-laki', this)" 
+                        <button type="button" onclick="selectGender('Laki-laki', this)" 
                             class="gender-btn py-4 rounded-2xl text-sm font-bold shadow-sm">
                             Laki-laki
                         </button>
-                        <button type="button" id="btn-perempuan" onclick="selectGender('Perempuan', this)" 
+                        <button type="button" onclick="selectGender('Perempuan', this)" 
                             class="gender-btn py-4 rounded-2xl text-sm font-bold shadow-sm">
                             Perempuan
                         </button>
@@ -92,7 +88,6 @@
                     <input type="hidden" id="jenis_kelamin" required>
                 </div>
 
-                <!-- Submit Button -->
                 <div class="pt-2">
                     <button type="submit" class="btn-primary w-full py-5 rounded-[1.5rem] text-white font-bold text-lg shadow-lg shadow-blue-200">
                         Masuk Dashboard
@@ -101,7 +96,6 @@
             </form>
         </div>
 
-        <!-- Small Footer -->
         <div class="text-center mt-10">
             <span class="text-[10px] font-bold text-slate-300 uppercase tracking-[0.3em]">Tilik Psikologi &bull; 2026</span>
         </div>
@@ -113,26 +107,20 @@
         function selectGender(val, el) {
             selectedGenderVal = val;
             document.getElementById('jenis_kelamin').value = val;
-            
-            // Reset UI semua tombol gender
             document.querySelectorAll('.gender-btn').forEach(btn => {
                 btn.classList.remove('border-blue-500', 'text-blue-600', 'bg-blue-50');
                 btn.classList.add('border-slate-100', 'text-slate-400', 'bg-white');
             });
-            
-            // Aktifkan tombol yang dipilih
             el.classList.remove('border-slate-100', 'text-slate-400', 'bg-white');
             el.classList.add('border-blue-500', 'text-blue-600', 'bg-blue-50');
         }
 
         document.getElementById('registrationForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            
             const nama = document.getElementById('nama_peserta').value;
             const gender = document.getElementById('jenis_kelamin').value;
 
             if(!gender) {
-                // Custom simple notification as replacement for alert
                 const notify = document.createElement('div');
                 notify.className = "fixed top-10 left-1/2 -translate-x-1/2 bg-red-600 text-white px-6 py-3 rounded-full font-bold shadow-xl z-[1000] fade-in";
                 notify.innerText = "Pilih jenis kelamin Anda!";
@@ -141,16 +129,15 @@
                 return;
             }
 
-            // Simpan data ke localStorage
             localStorage.setItem('nama_peserta', nama);
             localStorage.setItem('gender_peserta', gender);
 
-            // Transisi halus ke Dashboard
             document.body.style.opacity = "0";
             document.body.style.transition = "opacity 0.5s";
             
             setTimeout(() => {
-                window.location.href = "index.html"; 
+                // SEKARANG MENGARAH KE pilih-tes.html
+                window.location.href = "pilih-tes.html"; 
             }, 500);
         });
     </script>
